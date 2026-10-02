@@ -24,7 +24,7 @@ if ($email == '' || $password == '') {
 // MENCARI USER
 $query = "SELECT id, name, email, password, role
           FROM t_users
-          WHERE email = ?
+          WHERE email = ? 
           LIMIT 1";
 
 $stmt = mysqli_prepare($koneksi, $query);
@@ -100,6 +100,7 @@ if ($user['role'] !== 'admin' && $user['role'] !== 'guru') {
 
 
 // MEMBUAT SESSION
+$_SESSION['login'] = true;
 $_SESSION['user_id'] = $user['id'];
 $_SESSION['nama'] = $user['name'];
 $_SESSION['email'] = $user['email'];
