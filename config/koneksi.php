@@ -1,16 +1,14 @@
 <?php
+//config/koneksi.php
 
-$host = "localhost";
-$user = "root";
-$password = "";
-$database = "db_ukk_2026";
+$host = 'localhost';
+$user = 'root';
+$password = '';
+$database = 'db_ukk_2026';
 
 $koneksi = mysqli_connect($host, $user, $password, $database);
 
 if (!$koneksi) {
-    die("Koneksi database gagal: " . mysqli_connect_error());
+    die('Koneksi database gagal: ' .mysqli_connect_error());
 }
-
-mysqli_set_charset($koneksi, "utf8b4");
-
 ?>
