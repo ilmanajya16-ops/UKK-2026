@@ -130,17 +130,20 @@ $hasil = mysqli_query($koneksi, $sql);
             <?php echo $row['status_aktif'] == 1
                 ? 'Aktif' : 'Tidak Aktif'; ?>
         </td>
-        <td>
-            <a href="edit_walikelas.php?id=<?php echo $row['id']; ?>">
-                Edit
-            </a>
-            |
-            <a href="hapus_wali_kelas.php?id=<?php echo $row['id']; ?>"
-               onclick="return confirm('Yakin ingin menghapus data wali kelas ini?');">
-                Hapus
-            </a>
-        </td>
-    </tr>
+     <td>
+                <a href="edit_kelas.php?id=<?php echo $row['id']; ?>">
+                    <button type="button" class="btn btn-warning">Edit</button>
+                </a>
+
+                |
+
+                <a href="hapus_kelas.php?id=<?php echo $row['id']; ?>"
+                   onclick="return confirm('Yakin ingin menghapus data kelas ini?');">
+                <button type="button" class="btn btn-danger">Hapus</button>
+                </a>
+            </td>
+
+        </tr>
     <?php } ?>
 </table>
 

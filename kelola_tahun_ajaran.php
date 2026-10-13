@@ -134,15 +134,19 @@ $hasil = mysqli_query($koneksi, $sql);
             <td><?php echo $row['updated_at']; ?></td>
 
             <td>
-                <a href="edit_tahun_ajaran.php?id=<?php echo $row['id']; ?>">
-                    Edit
+           <td>
+                <a href="edit_kelas.php?id=<?php echo $row['id']; ?>">
+                    <button type="button" class="btn btn-warning">Edit</button>
                 </a>
+
                 |
-                <a href="hapus_tahun_ajaran.php?id=<?php echo $row['id']; ?>"
-                   onclick="return confirm('Yakin ingin menghapus data tahun ajaran ini?');">
-                    Hapus
+
+                <a href="hapus_kelas.php?id=<?php echo $row['id']; ?>"
+                   onclick="return confirm('Yakin ingin menghapus data kelas ini?');">
+                <button type="button" class="btn btn-danger">Hapus</button>
                 </a>
             </td>
+
         </tr>
         <?php } ?>
 

@@ -58,7 +58,7 @@ include 'includes/cek_session.php';
                 </li>
 
                 <li class="nav-item mb-2">
-                    <a href="" class="nav-link text-white">
+                    <a href="laporan.php" class="nav-link text-white">
                         Laporan
                     </a>
                 </li>
@@ -69,7 +69,7 @@ include 'includes/cek_session.php';
                 </li>
                 <hr class="text-secondary">
                 <li class="nav-item">
-                    <a href="#" class="nav-link text-danger">
+                    <a href="logout.php" class="nav-link text-danger">
                         Logout
                     </a>
                 </li>
