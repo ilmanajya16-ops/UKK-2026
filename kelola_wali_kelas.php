@@ -106,7 +106,7 @@ $hasil = mysqli_query($koneksi, $sql);
 
 
     <table class="table">
-  <thead class="thead-dark"></thead>
+  <thead class="thead-dark">
     <tr>
         <th>ID</th>
         <th>Tahun Ajaran ID</th>
