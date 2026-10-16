@@ -71,7 +71,7 @@ $hasil = mysqli_query($koneksi, $sql);
             </h4>
             <ul class="nav nav-pills flex-column">
                 <li class="nav-item mb-2">
-                    <a href="#" class="nav-link active">
+                    <a href="#" class="nav-link text-white">
                         Dashboard
                     </a>
                 </li>
@@ -93,24 +93,32 @@ $hasil = mysqli_query($koneksi, $sql);
 
                 <li class="nav-item mb-2">
                     <a href="kelola_tahun_ajaran.php" class="nav-link text-white">
-                        Tahun ajaran
+                        Tahun Ajaran
                     </a>
                 </li>
 
                 <li class="nav-item mb-2">
-                    <a href="penempatan_siswa.php" class="nav-link text-white">
+                    <a href="penempatan_siswa.php" class="nav-link active">
                         Penempatan Siswa
                     </a>
                 </li>
 
                     <li class="nav-item mb-2">
                     <a href="kelola_wali_kelas.php" class="nav-link text-white">
-                        Wali kelas
+                        Wali Kelas
+                    </a>
+                </li>
+
+
+                
+                    <li class="nav-item mb-2">
+                    <a href="kelola_pelanggaran_kategori.php" class="nav-link text-white">
+                        Kategori Pelanggaran
                     </a>
                 </li>
 
                 <li class="nav-item mb-2">
-                    <a href="" class="nav-link text-white">
+                    <a href="Laporan.php" class="nav-link text-white">
                         Laporan
                     </a>
                 </li>

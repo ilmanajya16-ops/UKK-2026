@@ -27,7 +27,7 @@ $hasil = mysqli_query($koneksi, $sql);
             </h4>
             <ul class="nav nav-pills flex-column">
                 <li class="nav-item mb-2">
-                    <a href="#" class="nav-link active">
+                    <a href="#" class="nav-link text-white">
                         Dashboard
                     </a>
                 </li>
@@ -62,7 +62,7 @@ $hasil = mysqli_query($koneksi, $sql);
                     </a> 
                       </li>
                 <li class="nav-item mb-2">
-                    <a href="kategori_pelanggaran.php" class="nav-link text-white">
+                    <a href="kategori_pelanggaran.php" class="nav-link active">
                         Kategori Pelanggaran
                     </a> 
                       </li>
@@ -78,7 +78,7 @@ $hasil = mysqli_query($koneksi, $sql);
                 </li>
                 <hr class="text-secondary">
                 <li class="nav-item">
-                    <a href="#" class="nav-link text-danger">
+                    <a href="logout.php" class="nav-link text-danger">
                         Logout
                     </a>
                 </li>

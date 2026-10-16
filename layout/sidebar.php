@@ -5,7 +5,7 @@
             </h4>
             <ul class="nav nav-pills flex-column">
                 <li class="nav-item mb-2">
-                    <a href="dashboard.php" class="nav-link text-white">
+                    <a href="dashboard.php" class="nav-link active">
                         Dashboard
                     </a>
                 </li>
@@ -27,7 +27,7 @@
 
                 <li class="nav-item mb-2">
                     <a href="kelola_tahun_ajaran.php" class="nav-link text-white">
-                        Tahun ajaran
+                        Tahun Ajaran
                     </a>
                 </li>
 
@@ -39,13 +39,13 @@
 
                     <li class="nav-item mb-2">
                     <a href="kelola_wali_kelas.php" class="nav-link text-white">
-                        Wali kelas
+                        Wali Kelas
                     </a>
                 </li>
 
                         <li class="nav-item mb-2">
                     <a href="kelola_pelanggaran_kategori.php" class="nav-link text-white">
-                        Kategori pelanggaran
+                        Kategori Pelanggaran
                     </a>
                 </li>
 
