@@ -1,3 +1,4 @@
+
 <?php
 // kelola_guru.php
 include 'includes/cek_session.php';
@@ -5,156 +6,235 @@ include 'config/koneksi.php';
 
 $sql = "SELECT * FROM t_guru ORDER BY nama ASC";
 $hasil = mysqli_query($koneksi, $sql);
+
+if (!$hasil) {
+    die("Query gagal: " . mysqli_error($koneksi));
+}
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Kelola Guru</title>
+
+    <!-- Bootstrap 4 -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
+
+    <!-- CSS DataTables -->
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css">
+
+    <style>
+        body {
+            background-color: #f5f6fa;
+        }
+
+        .sidebar {
+            background-color: #212529;
+            min-height: 100vh;
+        }
+
+        .sidebar h4 {
+            color: white;
+            margin-bottom: 25px;
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: #007bff;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+        }
+
+        .table th,
+        .table td {
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+    </style>
 </head>
 
 <body>
+
 <div class="container-fluid">
     <div class="row">
-        <!-- SIDEBAR -->
-        <div class="col-md-3 col-lg-2 bg-dark min-vh-100 p-3">
-            <h4 class="text-white mb-4">
-                My Website
-            </h4>
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item mb-2">
-                    <a href="dashboard.php" class="nav-link text-white">
-                        Dashboard
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="kelola_siswa.php" class="nav-link text-white">
-                        Data Siswa
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="kelola_guru.php" class="nav-link active">
-                        Data Guru
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="kelola_kelas.php" class="nav-link text-white">
-                        Kelas
-                    </a>
-                </li>
 
-                <li class="nav-item mb-2">
-                    <a href="kelola_tahun_ajaran.php" class="nav-link text-white">
-                        Tahun Ajaran
-                    </a>
-                </li>
+<?php
+            include 'layout/sidebar.php';
+        ?>
 
-                <li class="nav-item mb-2">
-                    <a href="penempatan_siswa.php" class="nav-link text-white">
-                        Penempatan Siswa
-                    </a>
-                </li>
+        <!-- KONTEN UTAMA -->
+        <main class="col-md-9 col-lg-10 content">
 
-                    <li class="nav-item mb-2">
-                    <a href="kelola_wali_kelas.php" class="nav-link text-white">
-                        Wali Kelas
-                    </a>
-                </li>
+            <div class="card shadow-sm">
+                <div class="card-body">
 
-                <li class="nav-item mb-2">
-                    <a href="kelola_pelanggaran_kategori.php" class="nav-link text-white">
-                        Kategori Pelanggaran
-                    </a>
-                </li>
+                    <h2 class="mb-3">Kelola Guru</h2>
 
+                    <div class="mb-3">
 
-                <li class="nav-item mb-2">
-                    <a href="" class="nav-link text-white">
-                        Laporan
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="about_me.php" class="nav-link text-white">
-                        About Me
-                    </a>
-                </li>
-                <hr class="text-secondary">
-                <li class="nav-item">
-                    <a href="#" class="nav-link text-danger">
-                        Logout
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <!-- KONTEN -->
-        <main class="col-md-9 col-lg-10 p-4">
-            
-            <div class="row"></div>
+                        <a href="dashboard.php"
+                           class="btn btn-secondary">
+                            Kembali ke Dashboard
+                        </a>
 
-     <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
+                        <a href="tambah_guru.php"
+                           class="btn btn-primary">
+                            + Tambah Guru
+                        </a>
 
-    <h1>Kelola Guru</h1>
+                    </div>
 
-    <p>
-        <a href="dashboard.php">Kembali ke Dashboard</a> |
-        <a href="tambah_guru.php">Tambah Guru</a>
-    </p>
+                    <!-- TABEL DATA GURU -->
+                    <div class="table-responsive">
 
-    <table class="table">
-  <thead class="thead-dark">
+                        <table id="tabelGuru"
+                               class="table table-striped table-bordered"
+                               style="width:100%">
 
-        <tr>
-            <th>ID</th>
-            <th>NIP</th>
-            <th>Nama Guru</th>
-            <th>Email</th>
-            <th>Status Aktif</th>
-            <th>Aksi</th>
-        </tr>
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>No</th>
+                                    <th>ID</th>
+                                    <th>NIP</th>
+                                    <th>Nama Guru</th>
+                                    <th>Email</th>
+                                    <th>Status Aktif</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
 
-        <?php while ($row = mysqli_fetch_assoc($hasil)) { ?>
+                            <tbody>
 
-        <tr>
+                                <?php
+                                $no = 1;
 
-            <td><?php echo $row['id']; ?></td>
+                                while ($row = mysqli_fetch_assoc($hasil)) {
+                                ?>
 
-            <td><?php echo $row['nip']; ?></td>
+                                <tr>
 
-            <td><?php echo $row['nama']; ?></td>
+                                    <td><?= $no++ ?></td>
 
-            <td><?php echo $row['email']; ?></td>
+                                    <td>
+                                        <?= htmlspecialchars((string)($row['id'] ?? '')) ?>
+                                    </td>
 
-            <td>
-                <?php
-                if ($row['status_aktif'] == 1) {
-                    echo "Aktif";
-                } else {
-                    echo "Tidak Aktif";
-                }
-                ?>
-            </td>
+                                    <td>
+                                        <?= htmlspecialchars((string)($row['nip'] ?? '')) ?>
+                                    </td>
 
-            <td>
-                <a href="edit_guru.php?id=<?php echo $row['id']; ?>">
-                   <button type="button" class="btn btn-warning">Edit</button>
-                </a>
+                                    <td>
+                                        <?= htmlspecialchars((string)($row['nama'] ?? '')) ?>
+                                    </td>
 
-                |
+                                    <td>
+                                        <?= htmlspecialchars((string)($row['email'] ?? '')) ?>
+                                    </td>
 
-                <a href="hapus_guru.php?id=<?php echo $row['id']; ?>"
-                   onclick="return confirm('Yakin ingin menghapus data guru ini?');">
-                     <button type="button" class="btn btn-danger">Hapus</button>
-                </a>
-            </td>
+                                    <td>
+                                        <?php
+                                        if (($row['status_aktif'] ?? 0) == 1) {
+                                            echo '<span class="badge badge-success">Aktif</span>';
+                                        } else {
+                                            echo '<span class="badge badge-secondary">Tidak Aktif</span>';
+                                        }
+                                        ?>
+                                    </td>
 
-        </tr>
+                                    <td>
+                                        <a href="edit_guru.php?id=<?= urlencode((string)$row['id']) ?>"
+                                           class="btn btn-warning btn-sm mb-1">
+                                            Edit
+                                        </a>
 
-        <?php } ?>
+                                        <a href="hapus_guru.php?id=<?= urlencode((string)$row['id']) ?>"
+                                           class="btn btn-danger btn-sm mb-1"
+                                           onclick="return confirm('Yakin ingin menghapus data guru ini?');">
+                                            Hapus
+                                        </a>
+                                    </td>
 
-    </table>
+                                </tr>
+
+                                <?php } ?>
+
+                            </tbody>
+
+                        </table>
+
+                    </div>
+
+                </div>
+            </div>
+
+        </main>
+
+    </div>
+</div>
+
+<!-- jQuery: harus dimuat sebelum DataTables -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
+
+<!-- JavaScript DataTables -->
+<script>
+$(document).ready(function () {
+
+    $('#tabelGuru').DataTable({
+        pageLength: 10,
+        lengthMenu: [5, 10, 25, 50, 100],
+        ordering: true,
+        searching: true,
+        paging: true,
+        info: true,
+        autoWidth: false,
+
+        language: {
+            search: "Cari guru:",
+            lengthMenu: "Tampilkan _MENU_ data",
+            zeroRecords: "Data guru tidak ditemukan",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Tidak ada data guru",
+            infoFiltered: "(difilter dari _MAX_ total data)",
+            emptyTable: "Belum ada data guru",
+
+            paginate: {
+                first: "Pertama",
+                last: "Terakhir",
+                next: "Selanjutnya",
+                previous: "Sebelumnya"
+            }
+        }
+    });
+
+});
+</script>
 
 </body>
 </html>

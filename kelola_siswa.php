@@ -1,142 +1,235 @@
+
 <?php
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
 $sql = "SELECT * FROM t_siswa ORDER BY nama ASC";
 $hasil = mysqli_query($koneksi, $sql);
+
+if (!$hasil) {
+    die("Query gagal: " . mysqli_error($koneksi));
+}
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Kelola Siswa</title>
+
+    <!-- Bootstrap 4 -->
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
+
+    <!-- CSS DataTables -->
+    <link rel="stylesheet"
+          href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css">
+
+    <style>
+        body {
+            background-color: #f5f6fa;
+        }
+
+        .sidebar {
+            background-color: #212529;
+            min-height: 100vh;
+        }
+
+        .sidebar h4 {
+            color: white;
+            margin-bottom: 25px;
+        }
+
+        .sidebar .nav-link {
+            color: white;
+            margin-bottom: 8px;
+        }
+
+        .sidebar .nav-link.active {
+            background-color: #007bff;
+        }
+
+        .content {
+            padding: 30px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+        }
+
+        .table th,
+        .table td {
+            vertical-align: middle;
+            white-space: nowrap;
+        }
+
+        .table-responsive {
+            overflow-x: auto;
+        }
+    </style>
 </head>
+
 <body>
+
 <div class="container-fluid">
     <div class="row">
-               <!-- SIDEBAR -->
-        <div class="col-md-3 col-lg-2 bg-dark min-vh-100 p-3">
-            <h4 class="text-white mb-4">
-                My Website
-            </h4>
-            <ul class="nav nav-pills flex-column">
-                <li class="nav-item mb-2">
-                    <a href="dashboard.php" class="nav-link text-white">
-                        Dashboard
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="kelola_siswa.php" class="nav-link active">
-                        Data Siswa
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="kelola_guru.php" class="nav-link text-white">
-                        Data Guru
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="kelola_kelas.php" class="nav-link text-white">
-                        Kelas
-                    </a>
-                </li>
 
-                <li class="nav-item mb-2">
-                    <a href="kelola_tahun_ajaran.php" class="nav-link text-white">
-                        Tahun Ajaran
-                    </a>
-                </li>
-
-                <li class="nav-item mb-2">
-                    <a href="penempatan_siswa.php" class="nav-link text-white">
-                        Penempatan Siswa
-                    </a>
-                </li>
-
-                    <li class="nav-item mb-2">
-                    <a href="kelola_wali_kelas.php" class="nav-link text-white">
-                        Wali Kelas
-                    </a>
-                </li>
-
-                        <li class="nav-item mb-2">
-                    <a href="kelola_pelanggaran_kategori.php" class="nav-link text-white">
-                        Kategori Pelanggaran
-                    </a>
-                </li>
-
-
-                <li class="nav-item mb-2">
-                    <a href="Laporan.php" class="nav-link text-white">
-                        Laporan
-                    </a>
-                </li>
-                <li class="nav-item mb-2">
-                    <a href="about_me.php" class="nav-link text-white">
-                        About Me
-                    </a>
-                </li>
-                <hr class="text-secondary">
-                <li class="nav-item">
-                    <a href="logout.php" class="nav-link text-danger">
-                        Logout
-                    </a>
-                </li>
-            </ul>
-        </div>
-        <!-- KONTEN -->
-        <main class="col-md-9 col-lg-10 p-4">
-          
-            <div class="row"></div>
-
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
-
-    <h1>Kelola Siswa</h1>
-
-    <p>
-        <a href="dashboard.php">Kembali ke Dashboard</a> |
-        <a href="tambah_siswa.php">Tambah Siswa</a>
-    </p>
-
-
-    <table class="table">
-  <thead class="thead-dark">
-        <tr>
-            <th>NIS</th>
-            <th>NISN</th>
-            <th>Nama</th>
-            <th>Jenis Kelamin</th>
-            <th>Tanggal Lahir</th>
-            <th>Alamat</th>
-            <th>Status Aktif</th>
-            <th>Aksi</th>
-        </tr>
-
-        <?php
-        while ($siswa = mysqli_fetch_assoc($hasil)) {
+<?php
+            include 'layout/sidebar.php';
         ?>
-        <tr>
-            <td><?= $siswa['nis'] ?? '' ?></td>
-            <td><?= $siswa['nisn'] ?? '' ?></td>
-            <td><?= $siswa['nama'] ?? '' ?></td>
-            <td><?= $siswa['jenis_kelamin'] ?? '' ?></td>
-            <td><?= $siswa['tanggal_lahir'] ?? '' ?></td>
-            <td><?= $siswa['alamat'] ?? '' ?></td>
-            <td><?= $siswa['status_aktif'] ?? 'Aktif' ?></td>
-            <td>
-                <a href="edit_siswa.php?nis=<?= $siswa['nis'] ?? '' ?>"></a> 
-            <button type="button" class="btn btn-warning">Edit</button>
-                <a href="hapus_siswa.php?nis=<?= $siswa['nis'] ?? '' ?>"></a>
-                  <button type="button" class="btn btn-danger">Hapus</button>
-            </td>
-        </tr>
-        <?php } ?>
 
-    </table>
+
+
+        <!-- KONTEN UTAMA -->
+        <main class="col-md-9 col-lg-10 content">
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <h2 class="mb-3">Kelola Siswa</h2>
+
+                    <p>
+                        <a href="dashboard.php"
+                           class="btn btn-secondary mb-3">
+                            Kembali
+                        </a>
+
+                        <a href="tambah_siswa.php"
+                           class="btn btn-primary mb-3">
+                            + Tambah Siswa
+                        </a>
+                    </p>
+
+                    <div class="table-responsive">
+
+                        <table id="tabelSiswa"
+                               class="table table-striped table-bordered"
+                               style="width:100%">
+
+                            <thead class="thead-dark">
+                                <tr>
+                                    <th>No</th>
+                                    <th>NIS</th>
+                                    <th>NISN</th>
+                                    <th>Nama</th>
+                                    <th>Jenis Kelamin</th>
+                                    <th>Tanggal Lahir</th>
+                                    <th>Alamat</th>
+                                    <th>Status Aktif</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+
+                            <tbody>
+                                <?php
+                                $no = 1;
+
+                                while ($siswa = mysqli_fetch_assoc($hasil)) {
+                                    $nis = $siswa['nis'] ?? '';
+                                ?>
+
+                                <tr>
+                                    <td><?= $no++ ?></td>
+
+                                    <td>
+                                        <?= htmlspecialchars($siswa['nis'] ?? '') ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($siswa['nisn'] ?? '') ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($siswa['nama'] ?? '') ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($siswa['jenis_kelamin'] ?? '') ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($siswa['tanggal_lahir'] ?? '') ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($siswa['alamat'] ?? '') ?>
+                                    </td>
+
+                                    <td>
+                                        <?= htmlspecialchars($siswa['status_aktif'] ?? 'Aktif') ?>
+                                    </td>
+
+                                    <td>
+                                        <a href="edit_siswa.php?nis=<?= urlencode($nis) ?>"
+                                           class="btn btn-warning btn-sm mb-1">
+                                            Edit
+                                        </a>
+
+                                        <a href="hapus_siswa.php?nis=<?= urlencode($nis) ?>"
+                                           class="btn btn-danger btn-sm mb-1"
+                                           onclick="return confirm('Yakin ingin menghapus data siswa ini?')">
+                                            Hapus
+                                        </a>
+                                    </td>
+                                </tr>
+
+                                <?php } ?>
+                            </tbody>
+
+                        </table>
+
+                    </div>
+                </div>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- jQuery -->
+<script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- DataTables JS -->
+<script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
+
+<!-- Inisialisasi DataTables -->
+<script>
+$(document).ready(function () {
+    $('#tabelSiswa').DataTable({
+        "pageLength": 10,
+        "lengthMenu": [5, 10, 25, 50, 100],
+        "ordering": true,
+        "searching": true,
+        "paging": true,
+        "info": true,
+        "autoWidth": false,
+        "language": {
+            "search": "Cari siswa:",
+            "lengthMenu": "Tampilkan _MENU_ data",
+            "zeroRecords": "Data siswa tidak ditemukan",
+            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            "infoEmpty": "Tidak ada data siswa",
+            "infoFiltered": "(difilter dari _MAX_ total data)",
+            "emptyTable": "Belum ada data siswa",
+            "paginate": {
+                "first": "Pertama",
+                "last": "Terakhir",
+                "next": "Selanjutnya",
+                "previous": "Sebelumnya"
+            }
+        }
+    });
+});
+</script>
 
 </body>
 </html>
+
+
