@@ -106,19 +106,22 @@ $total_poin = mysqli_fetch_assoc($query_poin)['total'];
 <div class="container-fluid">
     <div class="row">
 
+
+    
+
         <!-- Sidebar -->
         <?php include "layout/sidebar.php"; ?>
 
         <!-- Konten Dashboard -->
         <main class="col-md-9 col-lg-10 p-4">
 
-            <h2>Dashboard</h2>
+                        <h2>Dashboard</h2>
 
             <p>
                 Selamat datang,
                 <strong>
                     <?= htmlspecialchars(
-                        $_SESSION['name'] ?? 'Pengguna'
+                        ucfirst($_SESSION['role'] ?? 'Pengguna')
                     ); ?>
                 </strong>
                 di halaman dashboard.
@@ -216,23 +219,26 @@ $total_poin = mysqli_fetch_assoc($query_poin)['total'];
                     </div>
                 </div>
 
-                <!-- CARD TOTAL POIN -->
-                <div class="col-md-4 mb-3">
-                    <div class="card shadow-sm border-secondary h-100">
-                        <div class="card-body">
-                            <h5 class="card-title">Total Poin Pelanggaran</h5>
+               
+        <?php if (($_SESSION['role'] ?? '') == 'guru') : ?>
+            <!-- CARD TOTAL POIN KHUSUS GURU -->
+            <div class="col-md-4 mb-3">
+                <div class="card shadow-sm border-secondary h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Total Poin Pelanggaran</h5>
 
-                            <h2 class="text-secondary">
-                                <?= number_format((int) $total_poin); ?>
-                            </h2>
+                        <h2 class="text-secondary">
+                            <?= number_format((int) $total_poin); ?>
+                        </h2>
 
-                            <a href="rekap_poin.php"
-                               class="btn btn-secondary btn-sm">
-                                Lihat Rekap Poin
-                            </a>
-                        </div>
+                        <a href="rekap_poin.php"
+                        class="btn btn-secondary btn-sm">
+                            Lihat Rekap Poin
+                        </a>
                     </div>
                 </div>
+            </div>
+        <?php endif; ?>
 
             </div>
 

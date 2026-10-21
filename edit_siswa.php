@@ -1,149 +1,58 @@
 <?php
-// edit_siswa.php
-include 'includes/cek_session.php';
-include 'config/koneksi.php';
+include "config/koneksi.php";
 
 $id = $_GET['id'];
+$data = mysqli_query($koneksi, "SELECT * FROM t_siswa WHERE id='$id'");
+$siswa = mysqli_fetch_assoc($data);
 
-$sql = "SELECT * FROM t_siswa WHERE id = '$id'";
-$hasil = mysqli_query($koneksi, $sql);
-$data = mysqli_fetch_assoc($hasil);
+if (isset($_POST['update'])) {
+    mysqli_query($koneksi, "UPDATE t_siswa SET
+        nis='$_POST[nis]',
+        nisn='$_POST[nisn]',
+        nama='$_POST[nama]',
+        jenis_kelamin='$_POST[jk]',
+        tanggal_lahir='$_POST[tgl]',
+        alamat='$_POST[alamat]',
+        status_aktif='$_POST[status]'
+        WHERE id='$id'");
+
+    header("Location: kelola_siswa.php");
+}
 ?>
 
-<!DOCTYPE html>
-<html>
+<h2>Edit Siswa</h2>
 
-<head>
-    <title>Edit Siswa</title>
-</head>
+<form method="POST">
+NIS: <input name="nis" value="<?php echo $siswa['nis']; ?>"><br><br>
+NISN: <input name="nisn" value="<?php echo $siswa['nisn']; ?>"><br><br>
+Nama: <input name="nama" value="<?php echo $siswa['nama']; ?>"><br><br>
 
-<body>
+Jenis Kelamin:
+<select name="jk">
+    <option value="L">Laki-laki</option>
+    <option value="P">Perempuan</option>
+</select>
 
-    <h1>Edit Siswa</h1>
+<br><br>
 
-    <form action="proses_edit_siswa.php" method="POST">
+Tanggal Lahir:
+<input type="date" name="tgl" value="<?php echo $siswa['tanggal_lahir']; ?>">
 
-        <input type="hidden" name="id"
-               value="<?php echo $data['id']; ?>">
+<br><br>
 
-        <table>
+Alamat:
+<textarea name="alamat"><?php echo $siswa['alamat']; ?></textarea>
 
-            <tr>
-                <td>NIS</td>
-                <td>:</td>
-                <td>
-                    <input type="text" name="nis"
-                           value="<?php echo $data['nis']; ?>"
-                           required>
-                </td>
-            </tr>
+<br><br>
 
-            <tr>
-                <td>NISN</td>
-                <td>:</td>
-                <td>
-                    <input type="text" name="nisn"
-                           value="<?php echo $data['nisn']; ?>"
-                           required>
-                </td>
-            </tr>
+Status:
+<select name="status">
+    <option value="1">Aktif</option>
+    <option value="0">Tidak Aktif</option>
+</select>
 
-            <tr>
-                <td>Nama Siswa</td>
-                <td>:</td>
-                <td>
-                    <input type="text" name="nama"
-                           value="<?php echo $data['nama']; ?>"
-                           required>
-                </td>
-            </tr>
+<br><br>
+<button name="update">Update</button>
+</form>
 
-            <tr>
-                <td>Jenis Kelamin</td>
-                <td>:</td>
-                <td>
-                    <select name="jenis_kelamin" required>
-
-                        <option value="L"
-                            <?php
-                            if ($data['jenis_kelamin'] == 'L')
-                                echo 'selected';
-                            ?>>
-                            Laki-laki
-                        </option>
-
-                        <option value="P"
-                            <?php
-                            if ($data['jenis_kelamin'] == 'P')
-                                echo 'selected';
-                            ?>>
-                            Perempuan
-                        </option>
-
-                    </select>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Tanggal Lahir</td>
-                <td>:</td>
-                <td>
-                    <input type="date" name="tanggal_lahir"
-                           value="<?php echo $data['tanggal_lahir']; ?>"
-                           required>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Alamat</td>
-                <td>:</td>
-                <td>
-                    <textarea name="alamat"
-                              rows="4"
-                              cols="30"
-                              required><?php echo $data['alamat']; ?></textarea>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Status Aktif</td>
-                <td>:</td>
-                <td>
-                    <select name="status_aktif" required>
-
-                        <option value="1"
-                            <?php
-                            if ($data['status_aktif'] == 1)
-                                echo 'selected';
-                            ?>>
-                            Aktif
-                        </option>
-
-                        <option value="0"
-                            <?php
-                            if ($data['status_aktif'] == 0)
-                                echo 'selected';
-                            ?>>
-                            Tidak Aktif
-                        </option>
-
-                    </select>
-                </td>
-            </tr>
-
-            <tr>
-                <td colspan="3">
-                    <input type="submit" value="Update">
-                </td>
-            </tr>
-
-        </table>
-
-    </form>
-
-    <p>
-        <a href="kelola_siswa.php">Kembali ke Kelola Siswa</a>
-    </p>
-
-</body>
-</html>
+<a href="kelola_siswa.php">Kembali</a>

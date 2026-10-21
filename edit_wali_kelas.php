@@ -42,7 +42,7 @@ $guru = mysqli_query(
 
 <h1>Edit Wali Kelas</h1>
 
-<form action="proses_edit_walikelas.php" method="POST">
+<form action="proses_edit_wali_kelas.php" method="POST">
     <input type="hidden" name="id"
            value="<?php echo $data['id']; ?>">
 
@@ -142,7 +142,7 @@ $guru = mysqli_query(
     </table>
 </form>
 
-<p><a href="kelola_walikelas.php">Kembali</a></p>
+<p><a href="kelola_wali_kelas.php">Kembali</a></p>
 
 </body>
 </html>

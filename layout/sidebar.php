@@ -67,12 +67,14 @@ if ($_SESSION['role'] === "admin") {
                 </a>
             </li>
 
-            <li class="nav-item mb-2">
+                                    
+                    <li class="nav-item mb-2">
                 <a href="about_me.php"
-                   class="nav-link <?= ($current_page == 'about_me.php') ? 'active' : 'text-white' ?>">
+                class="nav-link <?= ($current_page == 'about_me.php') ? 'active' : 'text-white' ?>">
                     About Me
                 </a>
             </li>
+
 
             <hr class="text-secondary">
 
@@ -131,6 +133,7 @@ if ($_SESSION['role'] === "admin") {
                     Rekap Poin
                 </a>
             </li>
+            
 
             <hr class="text-secondary">
 

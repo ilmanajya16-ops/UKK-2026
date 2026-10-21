@@ -53,13 +53,7 @@ include 'includes/cek_session.php';
                 </td>
             </tr>
 
-            <tr>
-                <td>User ID</td>
-                <td>:</td>
-                <td>
-                    <input type="number" name="user_id">
-                </td>
-            </tr>
+           
 
             <tr>
                 <td colspan="3">
