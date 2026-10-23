@@ -1,5 +1,5 @@
 <?php
-// tambah_siswa.php
+// tambah_guru.php
 include 'includes/cek_session.php';
 ?>
 
@@ -7,35 +7,58 @@ include 'includes/cek_session.php';
 <html>
 
 <head>
-    <title>Tambah Siswa</title>
+
+     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Tambah Guru</title>
+
+     <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <!-- DataTables Bootstrap 5 -->
+    <link href="https://cdn.datatables.net/2.3.4/css/dataTables.bootstrap5.min.css"
+          rel="stylesheet">
 </head>
 
 <body>
 
-    <h1>Tambah Siswa</h1>
+      <div class="container-fluid">
+    <div class="row">
 
-    <form action="proses_tambah_siswa.php" method="POST">
+        <?php include 'layout/sidebar.php'; ?>
+
+        <!-- KONTEN -->
+        <main class="col-md-9 col-lg-10 p-4">
+
+             <h1>Tambah Guru</h1>
+
+            <div class="mb-3">
+                <a href="dashboard.php" class="btn btn-secondary mb-3">
+                    Kembali ke Dashboard
+                </a>
+            </div>
+
+    <form action="proses_tambah_guru.php" method="POST">
 
         <table>
 
-            <tr>
-                <td>NIS</td>
-                <td>:</td>
-                <td>
-                    <input type="text" name="nis" required>
-                </td>
+             <tr>
+                 <td>NIP    </td>
+                 <td>:</td>
+                 <td>
+                      <input type="text" name="nip"
+                      maxlength="10"
+                      pattern="[0-9]{1,10}"
+                      inputmode="numeric"
+                      title="NIP harus berupa angka maksimal 10 digit"
+                      required>
+                 </td>
             </tr>
 
             <tr>
-                <td>NISN</td>
-                <td>:</td>
-                <td>
-                    <input type="text" name="nisn" required>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Nama Siswa</td>
+                <td>Nama Guru</td>
                 <td>:</td>
                 <td>
                     <input type="text" name="nama" required>
@@ -43,30 +66,10 @@ include 'includes/cek_session.php';
             </tr>
 
             <tr>
-                <td>Jenis Kelamin</td>
+                <td>Email</td>
                 <td>:</td>
                 <td>
-                    <select name="jenis_kelamin" required>
-                        <option value="">-- Pilih --</option>
-                        <option value="L">Laki-laki</option>
-                        <option value="P">Perempuan</option>
-                    </select>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Tanggal Lahir</td>
-                <td>:</td>
-                <td>
-                    <input type="date" name="tanggal_lahir" required>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Alamat</td>
-                <td>:</td>
-                <td>
-                    <textarea name="alamat" rows="4" cols="30" required></textarea>
+                    <input type="email" name="email" required>
                 </td>
             </tr>
 
@@ -92,8 +95,9 @@ include 'includes/cek_session.php';
     </form>
 
     <p>
-        <a href="kelola_siswa.php">Kembali</a>
+        <a href="kelola_guru.php">Kembali</a>
     </p>
 
 </body>
+
 </html>

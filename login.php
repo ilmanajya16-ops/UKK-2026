@@ -1,97 +1,228 @@
-<?php
 
+<?php
 session_start();
 
-// Jika sudah login, langsung ke dashboard
+// Jika sudah login, bisa diarahkan ke dashboard
 // if (isset($_SESSION['user_id'])) {
 //     header("Location: dashboard.php");
 //     exit;
 // }
 
+$pesan_error = '';
+
+if (isset($_SESSION['pesan_error'])) {
+    $pesan_error = $_SESSION['pesan_error'];
+    unset($_SESSION['pesan_error']);
+}
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
-
 <head>
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css" integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO" crossorigin="anonymous">
     <meta charset="UTF-8">
-    <title>Login Pelanggaran Siswa</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Admin | Pelanggaran Siswa</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css"
+          rel="stylesheet">
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: linear-gradient(135deg, #dceaf5, #9bbbd3);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 25px;
+        }
+
+        .login-wrapper {
+            width: 100%;
+            max-width: 430px;
+        }
+
+        .login-card {
+            background: #ffffff;
+            padding: 38px 32px;
+            border-radius: 25px;
+            box-shadow: 0 15px 40px rgba(25, 55, 80, 0.16);
+            text-align: center;
+        }
+
+        .logo {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto 20px;
+            border-radius: 22px;
+            background: #173b59;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 35px;
+            font-weight: bold;
+            box-shadow: 0 7px 15px rgba(23, 59, 89, 0.2);
+        }
+
+        h2 {
+            color: #173b59;
+            font-size: 25px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            color: #8795a3;
+            font-size: 13px;
+            margin-bottom: 28px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: left;
+        }
+
+        .form-control {
+            height: 55px;
+            border: 2px solid #edf1f5;
+            background: #f0f2f5;
+            border-radius: 14px;
+            padding: 12px 18px;
+            font-size: 14px;
+            box-shadow: none;
+        }
+
+        .form-control:focus {
+            background: #ffffff;
+            border-color: #356b91;
+            box-shadow: 0 0 0 3px rgba(53, 107, 145, 0.1);
+        }
+
+        .btn-login {
+            width: 100%;
+            height: 55px;
+            margin-top: 8px;
+            background: #173b59;
+            color: #ffffff;
+            border: none;
+            border-radius: 14px;
+            font-size: 15px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: 0.3s;
+        }
+
+        .btn-login:hover {
+            background: #285c80;
+            color: #ffffff;
+            transform: translateY(-2px);
+        }
+
+        .error-message {
+            background: #fff0f0;
+            color: #b42318;
+            border: 1px solid #ffd6d6;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 18px;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .footer {
+            color: #ffffff;
+            text-align: right;
+            margin-top: 24px;
+            padding-right: 5px;
+        }
+
+        .footer h3 {
+            font-family: Georgia, serif;
+            font-size: 25px;
+            margin-bottom: 4px;
+        }
+
+        .footer p {
+            font-size: 12px;
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        @media (max-width: 480px) {
+            .login-card {
+                padding: 30px 22px;
+            }
+
+            h2 {
+                font-size: 22px;
+            }
+        }
+    </style>
 </head>
 
 <body>
-    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
 
-    <h1>Login Aplikasi Pelanggaran Siswa</h1>
+    <div class="login-wrapper">
 
-    <?php
+        <div class="login-card">
 
-    if (isset($_SESSION['pesan_error'])) {
+           
 
-        echo "<p>" . htmlspecialchars($_SESSION['pesan_error']) . "</p>";
+            <h2>Selamat Datang</h2>
+            <p class="subtitle">
+                Login ke Sistem Informasi Pelanggaran Siswa
+            </p>
 
-        unset($_SESSION['pesan_error']);
-    }
+            <?php if ($pesan_error !== ''): ?>
+                <div class="error-message">
+                    <?= htmlspecialchars($pesan_error, ENT_QUOTES, 'UTF-8') ?>
+                </div>
+            <?php endif; ?>
 
-    ?>
+            <form action="proses_login.php" method="POST" autocomplete="on">
 
-<form action="proses_login.php" method="POST" autocomplete="off">
-  <div class="form-group">
-    <label for="exampleInputEmail1">Email address</label>
-    <input type="email" name="email" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp" placeholder="Enter email">
-    
-  </div>
-  <div class="form-group">
-    <label for="exampleInputPassword1">Password</label>
-    <input type="password" name="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-  </div>
- 
-  <button type="submit" class="btn btn-primary">Submit</button>
-</form>
-  
-
-    <!-- <form action="proses_login.php" method="POST" autocomplete="off">
-
-        <table>
-
-            <tr>
-                <td>Email</td>
-                <td>:</td>
-                <td>
+                <div class="form-group">
                     <input
                         type="email"
                         name="email"
-                        value=""
-                        autocomplete="off"
+                        class="form-control"
+                        placeholder="Masukkan email"
+                        aria-label="Email"
+                        autocomplete="username"
                         required>
-                </td>
-            </tr>
+                </div>
 
-            <tr>
-                <td>Password</td>
-                <td>:</td>
-                <td>
+                <div class="form-group">
                     <input
                         type="password"
                         name="password"
-                        value=""
-                        autocomplete="new-password"
+                        class="form-control"
+                        placeholder="Masukkan password"
+                        aria-label="Password"
+                        autocomplete="current-password"
                         required>
-                </td>
-            </tr>
+                </div>
 
-            <tr>
-                <td colspan="3">
-                    <input type="submit" value="Login">
-                </td>
-            </tr>
+                <button type="submit" class="btn btn-login">
+                    LOGIN
+                </button>
 
-        </table>
+            </form>
 
-    </form> -->
+        </div>
+
+        <div class="footer">
+            
+            <p>Sistem Informasi Pelanggaran Siswa</p>
+        </div>
+
+    </div>
 
 </body>
-
 </html>

@@ -94,13 +94,13 @@ if (!$hasil) {
                     <p>
                         <a href="dashboard.php"
                            class="btn btn-secondary mb-3">
-                            Kembali
-                        </a>
+                            Kembali ke Dashboard
+                            </a>
 
-                        <a href="tambah_siswa.php"
-                           class="btn btn-primary mb-3">
-                            + Tambah Siswa
-                        </a>
+                       <a href="tambah_siswa.php" 
+                       class="btn btn-primary">
+                        + Tambah Siswa
+                    </a>
                     </p>
 
                     <div class="table-responsive">

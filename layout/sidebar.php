@@ -67,7 +67,21 @@ if ($_SESSION['role'] === "admin") {
                 </a>
             </li>
 
-                                    
+                    
+            <li class="nav-item mb-2">
+                <a href="kelola_jenis_pelanggaran.php"
+                   class="nav-link <?= ($current_page == 'kelola_jenis_pelanggaran.php') ? 'active' : 'text-white' ?>">
+                    Kategori jenis Pelanggaran
+                </a>
+            </li>
+
+          <li class="nav-item mb-2">
+                    <a href="Laporan.php" class="nav-link text-white">
+                        Laporan
+                    </a>
+                </li>
+
+
                     <li class="nav-item mb-2">
                 <a href="about_me.php"
                 class="nav-link <?= ($current_page == 'about_me.php') ? 'active' : 'text-white' ?>">
