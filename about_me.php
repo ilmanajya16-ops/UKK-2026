@@ -234,25 +234,29 @@ $current_page = basename($_SERVER['PHP_SELF']);
 
             </div>
 
-            <!-- Hobi -->
-            <div class="card info-card p-4 mb-4">
-                <h5 class="judul mb-3">
-                    <i class="bi bi-heart-fill text-danger"></i>
-                    Hobi Saya
-                </h5>
+<!-- Hobi -->
+<div class="card border-0 rounded-3 p-3 mb-3"
+     style="background: white; width: fit-content; max-width: 100%;">
 
-                <div>
-                    <span class="hobi-box">
-                        <i class="bi bi-music-note-beamed"></i>
-                        Menyanyi
-                    </span>
+    <h5 class="judul mb-2">
+        <i class="bi bi-heart-fill text-danger"></i>
+        Hobi Saya
+    </h5>
 
-                    <span class="hobi-box">
-                        <i class="bi bi-egg-fried"></i>
-                        Memasak
-                    </span>
-                </div>
-            </div>
+    <div class="d-flex flex-wrap gap-2">
+        <span class="badge rounded-pill p-2"
+              style="background: #f3f5ff; color: #4c63b6;">
+            <i class="bi bi-music-note-beamed"></i>
+            Menyanyi
+        </span>
+
+        <span class="badge rounded-pill p-2"
+              style="background: #f3f5ff; color: #4c63b6;">
+            <i class="bi bi-egg-fried"></i>
+            Memasak
+        </span>
+    </div>
+</div>
 
             <!-- Penutup -->
             <div class="text-center text-secondary py-3">
