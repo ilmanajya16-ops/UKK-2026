@@ -3,6 +3,7 @@
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
+// Mengambil data siswa
 $sql = "SELECT * FROM t_siswa ORDER BY nama ASC";
 $hasil = mysqli_query($koneksi, $sql);
 
@@ -13,6 +14,7 @@ if (!$hasil) {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -21,34 +23,15 @@ if (!$hasil) {
 
     <!-- Bootstrap 4 -->
     <link rel="stylesheet"
-          href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
+        href="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/css/bootstrap.min.css">
 
-    <!-- CSS DataTables -->
+    <!-- DataTables CSS -->
     <link rel="stylesheet"
-          href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css">
+        href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css">
 
     <style>
         body {
             background-color: #f5f6fa;
-        }
-
-        .sidebar {
-            background-color: #212529;
-            min-height: 100vh;
-        }
-
-        .sidebar h4 {
-            color: white;
-            margin-bottom: 25px;
-        }
-
-        .sidebar .nav-link {
-            color: white;
-            margin-bottom: 8px;
-        }
-
-        .sidebar .nav-link.active {
-            background-color: #007bff;
         }
 
         .content {
@@ -58,6 +41,25 @@ if (!$hasil) {
         .card {
             border: none;
             border-radius: 10px;
+        }
+
+        .card-body {
+            padding: 25px;
+        }
+
+        h2 {
+            color: #212529;
+            font-weight: 600;
+        }
+
+        .tombol-aksi {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 20px;
+        }
+
+        .tombol-aksi .btn {
+            padding: 10px 14px;
         }
 
         .table th,
@@ -77,11 +79,8 @@ if (!$hasil) {
 <div class="container-fluid">
     <div class="row">
 
-<?php
-            include 'layout/sidebar.php';
-        ?>
-
-
+        <!-- SIDEBAR -->
+        <?php include 'layout/sidebar.php'; ?>
 
         <!-- KONTEN UTAMA -->
         <main class="col-md-9 col-lg-10 content">
@@ -91,23 +90,25 @@ if (!$hasil) {
 
                     <h2 class="mb-3">Kelola Siswa</h2>
 
-                    <p>
-                        <a href="dashboard.php"
-                           class="btn btn-secondary mb-3">
+                    <!-- TOMBOL -->
+                    <div class="tombol-aksi">
+
+                        <a href="dashboard.php" class="btn btn-secondary">
                             Kembali ke Dashboard
-                            </a>
+                        </a>
 
-                       <a href="tambah_siswa.php" 
-                       class="btn btn-primary">
-                        + Tambah Siswa
-                    </a>
-                    </p>
+                        <a href="tambah_siswa.php" class="btn btn-primary">
+                            + Tambah Siswa
+                        </a>
 
+                    </div>
+
+                    <!-- TABEL SISWA -->
                     <div class="table-responsive">
 
                         <table id="tabelSiswa"
-                               class="table table-striped table-bordered"
-                               style="width:100%">
+                            class="table table-striped table-bordered"
+                            style="width:100%">
 
                             <thead class="thead-dark">
                                 <tr>
@@ -124,6 +125,7 @@ if (!$hasil) {
                             </thead>
 
                             <tbody>
+
                                 <?php
                                 $no = 1;
 
@@ -164,28 +166,30 @@ if (!$hasil) {
 
                                     <td>
                                         <a href="edit_siswa.php?nis=<?= urlencode($nis) ?>"
-                                           class="btn btn-warning btn-sm mb-1">
+                                            class="btn btn-warning btn-sm mb-1">
                                             Edit
                                         </a>
 
                                         <a href="hapus_siswa.php?nis=<?= urlencode($nis) ?>"
-                                           class="btn btn-danger btn-sm mb-1"
-                                           onclick="return confirm('Yakin ingin menghapus data siswa ini?')">
+                                            class="btn btn-danger btn-sm mb-1"
+                                            onclick="return confirm('Yakin ingin menghapus data siswa ini?')">
                                             Hapus
                                         </a>
                                     </td>
                                 </tr>
 
                                 <?php } ?>
-                            </tbody>
 
+                            </tbody>
                         </table>
 
                     </div>
+
                 </div>
             </div>
 
         </main>
+
     </div>
 </div>
 
@@ -197,39 +201,50 @@ if (!$hasil) {
 
 <!-- DataTables JS -->
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
+
 <script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
 
-<!-- Inisialisasi DataTables -->
+<!-- DATATABLES -->
 <script>
 $(document).ready(function () {
+
     $('#tabelSiswa').DataTable({
-        "pageLength": 10,
-        "lengthMenu": [5, 10, 25, 50, 100],
-        "ordering": true,
-        "searching": true,
-        "paging": true,
-        "info": true,
-        "autoWidth": false,
-        "language": {
-            "search": "Cari siswa:",
-            "lengthMenu": "Tampilkan _MENU_ data",
-            "zeroRecords": "Data siswa tidak ditemukan",
-            "info": "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            "infoEmpty": "Tidak ada data siswa",
-            "infoFiltered": "(difilter dari _MAX_ total data)",
-            "emptyTable": "Belum ada data siswa",
-            "paginate": {
-                "first": "Pertama",
-                "last": "Terakhir",
-                "next": "Selanjutnya",
-                "previous": "Sebelumnya"
+
+        pageLength: 10,
+
+        lengthMenu: [5, 10, 25, 50, 100],
+
+        ordering: true,
+
+        searching: true,
+
+        paging: true,
+
+        info: true,
+
+        autoWidth: false,
+
+        language: {
+            search: "Cari siswa:",
+            lengthMenu: "Tampilkan _MENU_ data",
+            zeroRecords: "Data siswa tidak ditemukan",
+            info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+            infoEmpty: "Tidak ada data siswa",
+            infoFiltered: "(difilter dari _MAX_ total data)",
+            emptyTable: "Belum ada data siswa",
+
+            paginate: {
+                first: "Pertama",
+                last: "Terakhir",
+                next: "Selanjutnya",
+                previous: "Sebelumnya"
             }
         }
+
     });
+
 });
 </script>
 
 </body>
 </html>
-
-
