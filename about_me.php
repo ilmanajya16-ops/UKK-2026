@@ -1,9 +1,14 @@
-
+```php
 <?php
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
-$current_page = basename($_SERVER['PHP_SELF']);
+$nama = "Ilma Najya";
+$kelas = "XII RPL";
+$sekolah = "SMK Muhammadiyah Tasikmalaya";
+$jurusan = "Rekayasa Perangkat Lunak";
+$hobi = "Menyanyi dan Memasak";
+$cita_cita = "PNS";
 ?>
 
 <!DOCTYPE html>
@@ -11,103 +16,115 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>About Me | Profil Saya</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-          rel="stylesheet">
+    <title>Tentang Diri Saya</title>
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css"
-          rel="stylesheet">
+    <!-- Bootstrap 5 -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
     <style>
         body {
-            background-color: #f4f7fc;
-            font-family: Arial, sans-serif;
+            background-color: #ffffff;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        .main-content {
+            min-height: 100vh;
+            padding: 30px;
+            background-color: #ffffff;
+        }
+
+        .page-title {
+            color: #164b80;
+            font-weight: bold;
+        }
+
+        .about-card {
+            max-width: 850px;
+            margin: 25px auto;
+            background: #ffffff;
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.07);
+        }
+
+        .header-about {
+            height: 170px;
+            background: linear-gradient(135deg, #0756a5, #4b9be8);
+        }
+
+        /* FOTO PERSEGI PANJANG */
+        .profile-img {
+            width: 160px;
+            height: 180px;
+            object-fit: cover;
+            border-radius: 12px;
+            border: 5px solid white;
+            margin-top: -85px;
+            background: white;
         }
 
         .judul {
-            font-weight: bold;
-            color: #263b60;
+            color: #164b80;
         }
 
-        .profile-card {
-            background: white;
-            border: none;
-            border-radius: 20px;
-            overflow: hidden;
+        .subjudul {
+            color: #6c849d;
         }
 
-        .profile-header {
-            background: linear-gradient(135deg, #4776e6, #8e54e9);
-            height: 160px;
-        }
-
-        .foto-profil {
-            width: 155px;
-            height: 155px;
-            object-fit: cover;
-            border: 5px solid white;
-            margin-top: -80px;
-            background: white;
-        }
-
-        .nama-profil {
-            color: #263b60;
-            font-weight: bold;
-        }
-
-        .badge-jurusan {
-            background: #e8efff;
-            color: #4169c1;
-            padding: 8px 15px;
-            border-radius: 20px;
-            font-size: 13px;
-        }
-
-        .info-card {
-            border: none;
-            border-radius: 15px;
-            background: white;
-            height: 100%;
-            box-shadow: 0 3px 12px rgba(0,0,0,0.04);
-        }
-
-        .icon-box {
-            width: 45px;
-            height: 45px;
-            border-radius: 12px;
-            background: #edf2ff;
-            color: #4776e6;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 21px;
-            flex-shrink: 0;
-        }
-
-        .label-info {
-            color: #8490a5;
-            font-size: 13px;
-            margin-bottom: 4px;
-        }
-
-        .isi-info {
-            color: #263b60;
-            font-weight: 600;
-            margin-bottom: 0;
-        }
-
-        .hobi-box {
-            background: #f3f5ff;
-            color: #4c63b6;
-            padding: 12px 18px;
-            border-radius: 12px;
-            display: inline-block;
-            margin: 5px;
-        }
-
-        .btn-kembali {
+        .biodata {
+            background: #ffffff;
+            padding: 15px;
             border-radius: 10px;
+            margin-bottom: 12px;
+            border: 1px solid #d9e8f5;
+            border-left: 4px solid #2684d9;
+            transition: 0.3s;
+        }
+
+        .biodata:hover {
+            background: #f5faff;
+            transform: translateX(5px);
+        }
+
+        .biodata i {
+            color: #1976c9;
+            font-size: 20px;
+            margin-right: 10px;
+        }
+
+        .btn-dashboard {
+            background: #1769aa;
+            color: white;
+            border-radius: 8px;
+            padding: 10px 25px;
+            transition: 0.3s;
+        }
+
+        .btn-dashboard:hover {
+            background: #104d80;
+            color: white;
+        }
+
+        .icon-title {
+            color: #1976c9;
+        }
+
+        hr {
+            color: #b8d5ed;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                padding: 15px;
+            }
+
+            .about-card {
+                margin-top: 20px;
+            }
         }
     </style>
 </head>
@@ -117,160 +134,126 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <div class="container-fluid">
     <div class="row">
 
-        <?php include 'layout/sidebar.php'; ?>
+        <!-- SIDEBAR DASHBOARD -->
+        <?php include "layout/sidebar.php"; ?>
 
-        <main class="col-md-9 col-lg-10 p-4">
+        <!-- KONTEN UTAMA -->
+        <main class="col-md-9 col-lg-10 main-content">
 
-            <!-- Judul halaman -->
-            <div class="d-flex justify-content-between align-items-center flex-wrap mb-4">
-                <div>
-                    <h2 class="judul mb-1">About Me</h2>
-                    <p class="text-secondary mb-0">
-                        Kenali lebih dekat tentang diri saya.
-                    </p>
-                </div>
+            <!-- JUDUL HALAMAN -->
+            <h3 class="page-title">
+                <i class="bi bi-person-lines-fill"></i>
+                Tentang Diri Saya
+            </h3>
 
-                <a href="dashboard.php" class="btn btn-primary btn-sm btn-kembali mt-2">
-                    <i class="bi bi-arrow-left"></i> Kembali ke Dashboard
-                </a>
-            </div>
+            <p class="text-muted">
+                Halaman informasi dan profil pribadi.
+            </p>
 
-            <!-- Kartu profil utama -->
-            <div class="card profile-card shadow-sm mb-4">
+            <!-- KARTU PROFIL -->
+            <div class="about-card">
 
-                <div class="profile-header"></div>
+                <!-- HEADER BIRU -->
+                <div class="header-about"></div>
 
-                <div class="card-body text-center pb-4">
+                <div class="text-center px-4 pb-4">
 
+                    <!-- FOTO PROFIL -->
                     <img src="img/image.png"
-                         alt="Foto profil Ilma Najya"
-                         class="rounded-circle foto-profil shadow-sm">
+                         class="profile-img"
+                         alt="Foto Profil">
 
-                    <h3 class="nama-profil mt-3 mb-2">
-                        Ilma Najya
+                    <h3 class="fw-bold mt-3 judul">
+                        <?php echo $nama; ?>
                     </h3>
 
-                    <span class="badge-jurusan">
-                        <i class="bi bi-laptop"></i>
-                        Rekayasa Perangkat Lunak
-                    </span>
-
-                    <p class="text-secondary mt-3 mb-0">
-                        Halo! Selamat datang di halaman profil saya.
-                        Saya merupakan siswi yang sedang belajar
-                        pemrograman dan pengembangan website.
+                    <p class="subjudul">
+                        Siswi Rekayasa Perangkat Lunak
                     </p>
 
-                </div>
-            </div>
+                    <hr class="my-4">
 
-            <!-- Biodata -->
-            <h5 class="judul mb-3">
-                <i class="bi bi-person-vcard"></i>
-                Biodata Saya
-            </h5>
+                    <!-- PROFIL DIRI -->
+                    <h5 class="fw-bold text-start mb-3">
+                        <i class="bi bi-person-circle icon-title"></i>
+                        Profil Diri Saya
+                    </h5>
 
-            <div class="row g-3 mb-4">
+                    <p class="text-muted text-start">
+                        Halo! Perkenalkan, nama saya
+                        <?php echo $nama; ?>.
+                        Saya merupakan siswi kelas
+                        <?php echo $kelas; ?> di
+                        <?php echo $sekolah; ?> dengan jurusan
+                        <?php echo $jurusan; ?>.
 
-                <div class="col-md-6">
-                    <div class="card info-card p-3">
-                        <div class="d-flex align-items-center">
-                            <div class="icon-box me-3">
-                                <i class="bi bi-person"></i>
-                            </div>
-                            <div>
-                                <p class="label-info">Nama Lengkap</p>
-                                <p class="isi-info">Ilma Najya</p>
-                            </div>
-                        </div>
+                        Saya memiliki hobi menyanyi dan memasak.
+                        Saya juga memiliki cita-cita menjadi seorang PNS.
+                        Melalui halaman ini, saya ingin memperkenalkan
+                        diri serta berbagi sedikit informasi mengenai diri saya.
+                    </p>
+
+                    <!-- BIODATA -->
+                    <h5 class="fw-bold text-start mt-4 mb-3">
+                        <i class="bi bi-card-list icon-title"></i>
+                        Biodata Saya
+                    </h5>
+
+                    <div class="biodata text-start">
+                        <i class="bi bi-person"></i>
+                        <strong>Nama Lengkap:</strong>
+                        <?php echo $nama; ?>
                     </div>
-                </div>
 
-                <div class="col-md-6">
-                    <div class="card info-card p-3">
-                        <div class="d-flex align-items-center">
-                            <div class="icon-box me-3">
-                                <i class="bi bi-mortarboard"></i>
-                            </div>
-                            <div>
-                                <p class="label-info">Kelas</p>
-                                <p class="isi-info">XII RPL</p>
-                            </div>
-                        </div>
+                    <div class="biodata text-start">
+                        <i class="bi bi-mortarboard"></i>
+                        <strong>Kelas:</strong>
+                        <?php echo $kelas; ?>
                     </div>
-                </div>
 
-                <div class="col-md-6">
-                    <div class="card info-card p-3">
-                        <div class="d-flex align-items-center">
-                            <div class="icon-box me-3">
-                                <i class="bi bi-building"></i>
-                            </div>
-                            <div>
-                                <p class="label-info">Sekolah</p>
-                                <p class="isi-info">
-                                    SMK Muhammadiyah Tasikmalaya
-                                </p>
-                            </div>
-                        </div>
+                    <div class="biodata text-start">
+                        <i class="bi bi-building"></i>
+                        <strong>Sekolah:</strong>
+                        <?php echo $sekolah; ?>
                     </div>
-                </div>
 
-                <div class="col-md-6">
-                    <div class="card info-card p-3">
-                        <div class="d-flex align-items-center">
-                            <div class="icon-box me-3">
-                                <i class="bi bi-code-slash"></i>
-                            </div>
-                            <div>
-                                <p class="label-info">Jurusan</p>
-                                <p class="isi-info">
-                                    Rekayasa Perangkat Lunak
-                                </p>
-                            </div>
-                        </div>
+                    <div class="biodata text-start">
+                        <i class="bi bi-laptop"></i>
+                        <strong>Jurusan:</strong>
+                        <?php echo $jurusan; ?>
                     </div>
+
+                    <div class="biodata text-start">
+                        <i class="bi bi-heart"></i>
+                        <strong>Hobi:</strong>
+                        <?php echo $hobi; ?>
+                    </div>
+
+                    <div class="biodata text-start">
+                        <i class="bi bi-star"></i>
+                        <strong>Cita-cita:</strong>
+                        <?php echo $cita_cita; ?>
+                    </div>
+
+                    <!-- TOMBOL KEMBALI -->
+                    <div class="mt-4">
+                        <a href="dashboard.php" class="btn btn-dashboard">
+                            <i class="bi bi-arrow-left"></i>
+                            Kembali ke Dashboard
+                        </a>
+                    </div>
+
                 </div>
-
-            </div>
-
-<!-- Hobi -->
-<div class="card border-0 rounded-3 p-3 mb-3"
-     style="background: white; width: fit-content; max-width: 100%;">
-
-    <h5 class="judul mb-2">
-        <i class="bi bi-heart-fill text-danger"></i>
-        Hobi Saya
-    </h5>
-
-    <div class="d-flex flex-wrap gap-2">
-        <span class="badge rounded-pill p-2"
-              style="background: #f3f5ff; color: #4c63b6;">
-            <i class="bi bi-music-note-beamed"></i>
-            Menyanyi
-        </span>
-
-        <span class="badge rounded-pill p-2"
-              style="background: #f3f5ff; color: #4c63b6;">
-            <i class="bi bi-egg-fried"></i>
-            Memasak
-        </span>
-    </div>
-</div>
-
-            <!-- Penutup -->
-            <div class="text-center text-secondary py-3">
-                <small>
-                    <i class="bi bi-stars"></i>
-                    Terus belajar, berkembang, dan berkarya.
-                </small>
             </div>
 
         </main>
+
     </div>
 </div>
 
+<!-- BOOTSTRAP JAVASCRIPT -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 </body>
 </html>
+```
