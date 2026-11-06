@@ -77,8 +77,8 @@ if ($_SESSION['role'] === "admin") {
             </li>
 
             <li class="nav-item mb-2">
-                <a href="Laporan.php"
-                   class="nav-link  <?= in_array($current_page, ['Laporan.php','editlaporan.php','tambah_laporan.php','hapus_laporan.php.php']) ?'active' : 'text-white' ?>">
+                <a href="laporan.php"
+                   class="nav-link  <?= in_array($current_page, ['laporan.php','editlaporan.php','tambah_laporan.php','hapus_laporan.php.php']) ?'active' : 'text-white' ?>">
                     Laporan
                 </a>
             </li>
