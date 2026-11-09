@@ -71,6 +71,7 @@ if (!$data) {
                                     class="form-control"
                                     value="<?= htmlspecialchars($data['nip'] ?? '') ?>"
                                     maxlength="18"
+                                    inputmode="numeric"
                                     pattern="[0-9]{1,18}"
                                     title="NIP harus berupa angka dan maksimal 18 digit"
                                     oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 18)"
