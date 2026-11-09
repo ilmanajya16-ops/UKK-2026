@@ -64,15 +64,18 @@ if (!$data) {
                         <input type="hidden"
                                name="id"
                                value="<?= htmlspecialchars($data['id']) ?>">
-
-                        <div class="mb-3">
-                            <label class="form-label">NIP</label>
-                            <input type="text"
-                                   name="nip"
-                                   class="form-control"
-                                   value="<?= htmlspecialchars($data['nip'] ?? '') ?>"
-                                   required>
-                        </div>
+                            <div class="mb-3">
+                                <label class="form-label">NIP</label>
+                                <input type="text"
+                                    name="nip"
+                                    class="form-control"
+                                    value="<?= htmlspecialchars($data['nip'] ?? '') ?>"
+                                    maxlength="18"
+                                    pattern="[0-9]{1,18}"
+                                    title="NIP harus berupa angka dan maksimal 18 digit"
+                                    oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 18)"
+                                    required>
+                            </div>
 
                         <div class="mb-3">
                             <label class="form-label">Nama Guru</label>

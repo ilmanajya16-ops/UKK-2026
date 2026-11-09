@@ -131,8 +131,7 @@ $cita_cita = "PNS";
 
 <body>
 
-<div class="container-fluid">
-    <div class="row">
+<main class="content">
 
         <!-- SIDEBAR DASHBOARD -->
         <?php include "layout/sidebar.php"; ?>

@@ -44,10 +44,11 @@ $hasil = mysqli_query($koneksi, $sql);
 
 <body>
 
-<div class="container-fluid">
-    <div class="row">
+<div class="container-fluid p-0">
 
-        <?php include 'layout/sidebar.php'; ?>
+    <?php include 'layout/sidebar.php'; ?>
+
+    <main class="content">
 
         <!-- KONTEN -->
         <main class="col-md-9 col-lg-10 p-4">
