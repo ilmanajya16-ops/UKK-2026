@@ -67,7 +67,7 @@ $guru = mysqli_query(
         <?php include 'layout/sidebar.php'; ?>
 
         <!-- KONTEN UTAMA -->
-        <main class="col-md-9 col-lg-10 p-4">
+       <main class="content">
 
             <h1 class="mb-4">Edit Wali Kelas</h1>
 
