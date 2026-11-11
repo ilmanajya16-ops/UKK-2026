@@ -170,12 +170,20 @@ $total_poin = mysqli_fetch_assoc($query_poin)['total'];
         <div class="mb-4">
             <h2>Dashboard</h2>
 
-            <p class="text-muted">
-                Selamat datang,
-                <strong><?= htmlspecialchars(ucfirst($role)); ?></strong>
-                di halaman dashboard.
-            </p>
-        </div>
+<p class="text-muted">
+    Selamat datang,
+    <strong>
+        <?= htmlspecialchars($_SESSION['name'] ?? 'Pengguna'); ?>
+    </strong>
+    <span>
+        (<?= htmlspecialchars(
+            $role == 'admin' ? 'Admin' :
+            ($role == 'guru' ? 'Guru' :
+            ($role == 'wali_kelas' ? 'Wali Kelas' : 'Pengguna'))
+        ); ?>)
+    </span>
+    di halaman dashboard.
+</p>
 
         <?php if ($role == 'admin') : ?>
 

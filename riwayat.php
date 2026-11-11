@@ -8,6 +8,33 @@ include 'includes/cek_session.php';
 // Menghubungkan ke database
 include 'config/koneksi.php';
 
+$guru_id = 0;
+
+if (($_SESSION['role'] ?? '') == 'guru') {
+
+    $id_user = (int) ($_SESSION['id'] ?? 0);
+
+    $stmt_guru = mysqli_prepare(
+        $koneksi,
+        "SELECT id FROM t_guru
+         WHERE user_id = ?
+         LIMIT 1"
+    );
+
+    mysqli_stmt_bind_param($stmt_guru, "i", $id_user);
+    mysqli_stmt_execute($stmt_guru);
+
+    $hasil_guru = mysqli_stmt_get_result($stmt_guru);
+    $data_guru = mysqli_fetch_assoc($hasil_guru);
+
+    if ($data_guru) {
+        $guru_id = (int) $data_guru['id'];
+    }
+
+    mysqli_stmt_close($stmt_guru);
+}
+
+
 // Mengambil kata pencarian
 $cari = isset($_GET['cari'])
     ? mysqli_real_escape_string($koneksi, trim($_GET['cari']))
@@ -17,11 +44,19 @@ $cari = isset($_GET['cari'])
 $status = isset($_GET['status'])
     ? mysqli_real_escape_string($koneksi, trim($_GET['status']))
     : '';
-
-// Query dasar
 $sql = "SELECT *
         FROM t_pelanggaran_siswa
         WHERE 1=1";
+
+if (($_SESSION['role'] ?? '') == 'guru') {
+
+    if ($guru_id > 0) {
+        $sql .= " AND guru_id = $guru_id";
+    } else {
+        $sql .= " AND 1=0";
+    }
+
+}
 
 // Pencarian berdasarkan nama siswa, pelanggaran, kelas, atau guru
 if ($cari != '') {
@@ -257,7 +292,6 @@ $jumlah = mysqli_num_rows($query);
                                 <th>Kelas</th>
                                 <th>Jenis Pelanggaran</th>
                                 <th>Poin</th>
-                                <th>Guru Pencatat</th>
                                 <th>Keterangan</th>
                                 <th>Tindakan</th>
                                 <th>Status</th>
@@ -296,9 +330,6 @@ $jumlah = mysqli_num_rows($query);
                                         </span>
                                     </td>
 
-                                    <td>
-                                        <?= htmlspecialchars($data['nama_guru'] ?? '-'); ?>
-                                    </td>
 
                                     <td>
                                         <?= htmlspecialchars($data['keterangan'] ?? '-'); ?>

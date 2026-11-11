@@ -1,38 +1,98 @@
 
 <?php
 // tindakan.php
+
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
 $pesan_error = '';
 
-// Proses menyimpan tindakan
+// ============================================
+// PROSES MENYIMPAN TINDAKAN
+// ============================================
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $id = (int) ($_POST['id'] ?? 0);
 
-    $tindakan = mysqli_real_escape_string(
+    $tindakan = trim($_POST['tindakan'] ?? '');
+
+    if ($id <= 0 || $tindakan === '') {
+
+        $_SESSION['pesan_error'] = "Data tindakan tidak boleh kosong.";
+
+        header('Location: tindakan.php');
+        exit;
+
+    }
+
+    $stmt = mysqli_prepare(
         $koneksi,
-        trim($_POST['tindakan'] ?? '')
+        "UPDATE t_pelanggaran_siswa
+         SET tindakan = ?
+         WHERE id = ?"
     );
 
-    $sql_update = "UPDATE t_pelanggaran_siswa
-                   SET tindakan = '$tindakan'
-                   WHERE id = $id";
-
-    if (mysqli_query($koneksi, $sql_update)) {
-        header('Location: tindakan.php?pesan=berhasil');
+    if (!$stmt) {
+        $_SESSION['pesan_error'] = mysqli_error($koneksi);
+        header('Location: tindakan.php');
         exit;
-    } else {
-        $pesan_error = mysqli_error($koneksi);
     }
+
+    mysqli_stmt_bind_param($stmt, "si", $tindakan, $id);
+
+    if (mysqli_stmt_execute($stmt)) {
+
+        if (mysqli_stmt_affected_rows($stmt) >= 0) {
+            $_SESSION['pesan_sukses'] = "Tindakan berhasil disimpan.";
+        } else {
+            $_SESSION['pesan_error'] = "Tindakan gagal disimpan.";
+        }
+
+    } else {
+
+        $_SESSION['pesan_error'] = mysqli_stmt_error($stmt);
+
+    }
+
+    mysqli_stmt_close($stmt);
+
+    header('Location: tindakan.php');
+    exit;
 }
 
-// Mengambil data pelanggaran siswa
-$sql = "SELECT id, nama_siswa, nama_kelas,
-               nama_pelanggaran, tanggal,
-               keterangan, tindakan
+// ============================================
+// MENGAMBIL PESAN
+// ============================================
+
+if (isset($_SESSION['pesan_sukses'])) {
+    $pesan_sukses = $_SESSION['pesan_sukses'];
+    unset($_SESSION['pesan_sukses']);
+} else {
+    $pesan_sukses = '';
+}
+
+if (isset($_SESSION['pesan_error'])) {
+    $pesan_error = $_SESSION['pesan_error'];
+    unset($_SESSION['pesan_error']);
+}
+
+// ============================================
+// MENGAMBIL DATA PELANGGARAN
+// HANYA YANG BELUM MEMILIKI TINDAKAN
+// ============================================
+
+$sql = "SELECT
+            id,
+            nama_siswa,
+            nama_kelas,
+            nama_pelanggaran,
+            tanggal,
+            keterangan,
+            tindakan
         FROM t_pelanggaran_siswa
+        WHERE tindakan IS NULL
+           OR TRIM(tindakan) = ''
         ORDER BY tanggal DESC";
 
 $hasil = mysqli_query($koneksi, $sql);
@@ -44,7 +104,9 @@ if (!$hasil) {
 
 <!DOCTYPE html>
 <html lang="id">
+
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -54,11 +116,16 @@ if (!$hasil) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
           rel="stylesheet">
 
-    <!-- DataTables Bootstrap 4 -->
-    <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css"
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+          rel="stylesheet">
+
+    <!-- DataTables Bootstrap 5 -->
+    <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css"
           rel="stylesheet">
 
     <style>
+
         body {
             background-color: #f5f6fa;
         }
@@ -110,13 +177,17 @@ if (!$hasil) {
         }
 
         @media (max-width: 767.98px) {
+
             .content {
                 margin-left: 0;
                 width: 100%;
                 padding: 20px;
             }
+
         }
+
     </style>
+
 </head>
 
 <body>
@@ -129,39 +200,58 @@ if (!$hasil) {
     <!-- KONTEN -->
     <main class="content">
 
-        <h2 class="mb-2">Tindakan Pelanggaran Siswa</h2>
+        <h2 class="mb-2">
+            Tindakan Pelanggaran Siswa
+        </h2>
 
         <p class="text-muted">
             Kelola tindakan untuk setiap pelanggaran siswa.
         </p>
 
-        <!-- Tombol kembali -->
+        <!-- TOMBOL KEMBALI -->
         <div class="tombol-aksi">
+
             <a href="dashboard.php" class="btn btn-secondary">
+                <i class="bi bi-arrow-left"></i>
                 Kembali ke Dashboard
             </a>
+
         </div>
 
-        <!-- Pesan berhasil -->
-        <?php if (isset($_GET['pesan']) && $_GET['pesan'] === 'berhasil') { ?>
+        <!-- PESAN BERHASIL -->
+        <?php if (!empty($pesan_sukses)) { ?>
+
             <div class="alert alert-success alert-dismissible fade show">
-                Tindakan berhasil disimpan.
+
+                <i class="bi bi-check-circle-fill"></i>
+
+                <?= htmlspecialchars($pesan_sukses); ?>
 
                 <button type="button"
-                        class="close"
-                        data-dismiss="alert"
-                        aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
+                        class="btn-close"
+                        data-bs-dismiss="alert">
                 </button>
+
             </div>
+
         <?php } ?>
 
-        <!-- Pesan error -->
+        <!-- PESAN ERROR -->
         <?php if (!empty($pesan_error)) { ?>
-            <div class="alert alert-danger">
-                Gagal menyimpan tindakan:
+
+            <div class="alert alert-danger alert-dismissible fade show">
+
+                <i class="bi bi-exclamation-triangle-fill"></i>
+
                 <?= htmlspecialchars($pesan_error); ?>
+
+                <button type="button"
+                        class="btn-close"
+                        data-bs-dismiss="alert">
+                </button>
+
             </div>
+
         <?php } ?>
 
         <!-- CARD DATA -->
@@ -169,14 +259,18 @@ if (!$hasil) {
 
             <div class="card-body">
 
-                <h5 class="mb-4">Data Pelanggaran Siswa</h5>
+                <h5 class="mb-4">
+                    <i class="bi bi-clipboard-check"></i>
+                    Data Pelanggaran Siswa
+                </h5>
 
                 <div class="table-responsive">
 
                     <table id="tabelTindakan"
                            class="table table-striped table-bordered table-hover">
 
-                        <thead class="thead-dark">
+                        <thead class="table-dark">
+
                             <tr>
                                 <th>No.</th>
                                 <th>Nama Siswa</th>
@@ -187,6 +281,7 @@ if (!$hasil) {
                                 <th>Tindakan</th>
                                 <th>Aksi</th>
                             </tr>
+
                         </thead>
 
                         <tbody>
@@ -217,7 +312,9 @@ if (!$hasil) {
                                         <?= htmlspecialchars($row['keterangan'] ?? '-'); ?>
                                     </td>
 
+                                    <!-- FORM TINDAKAN -->
                                     <td>
+
                                         <form
                                             id="formTindakan<?= (int) $row['id']; ?>"
                                             method="POST"
@@ -232,18 +329,25 @@ if (!$hasil) {
                                                 class="form-control"
                                                 rows="2"
                                                 placeholder="Masukkan tindakan..."
-                                                required><?= htmlspecialchars($row['tindakan'] ?? ''); ?></textarea>
+                                                required></textarea>
 
                                         </form>
+
                                     </td>
 
+                                    <!-- TOMBOL SIMPAN -->
                                     <td>
+
                                         <button
                                             type="submit"
                                             form="formTindakan<?= (int) $row['id']; ?>"
                                             class="btn btn-success btn-sm">
+
+                                            <i class="bi bi-save"></i>
                                             Simpan
+
                                         </button>
+
                                     </td>
 
                                 </tr>
@@ -255,7 +359,9 @@ if (!$hasil) {
                     </table>
 
                 </div>
+
             </div>
+
         </div>
 
     </main>
@@ -265,15 +371,16 @@ if (!$hasil) {
 <!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- Bootstrap JS 4.1.3 -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- DataTables 1.13.8 -->
+<!-- DataTables -->
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
-<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- Inisialisasi DataTables -->
+<!-- INISIALISASI DATATABLES -->
 <script>
+
 $(document).ready(function () {
 
     $('#tabelTindakan').DataTable({
@@ -283,11 +390,15 @@ $(document).ready(function () {
         lengthMenu: [5, 10, 25, 50, 100],
 
         searching: true,
+
         ordering: true,
+
         paging: true,
+
         info: true,
 
         autoWidth: false,
+
         scrollX: true,
 
         order: [[4, 'desc']],
@@ -303,6 +414,7 @@ $(document).ready(function () {
         drawCallback: function () {
 
             var api = this.api();
+
             var nomorAwal = api.page.info().start;
 
             api.column(0, {
@@ -330,13 +442,18 @@ $(document).ready(function () {
 
             zeroRecords: "Data pelanggaran tidak ditemukan",
 
-            emptyTable: "Belum ada data pelanggaran",
+            emptyTable: "Belum ada pelanggaran yang perlu diberi tindakan",
 
             paginate: {
+
                 first: "Pertama",
+
                 last: "Terakhir",
+
                 next: "Berikutnya",
+
                 previous: "Sebelumnya"
+
             }
 
         }
@@ -344,6 +461,7 @@ $(document).ready(function () {
     });
 
 });
+
 </script>
 
 </body>

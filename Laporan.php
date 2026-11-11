@@ -1,102 +1,196 @@
 <?php
-// Laporan.php
+// laporan.php
 
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
-// Jika tombol Export Excel ditekan, proses unduhan
-if (isset($_GET['export']) && $_GET['export'] === 'excel') {
+// ============================================
+// 1. AMBIL DATA SESSION
+// ============================================
+$role = $_SESSION['role'] ?? '';
+$id_user = (int) ($_SESSION['id'] ?? $_SESSION['id_user'] ?? 0);
 
-    $sqlExcel = "
-        SELECT
-            s.nis,
-            s.nama AS nama_siswa,
-            p.kode,
-            p.nama AS nama_pelanggaran,
-            p.poin,
-            ps.id AS id_pelanggaran_siswa
+// ============================================
+// 2. CEK HAK AKSES
+// ============================================
+if ($role !== 'admin' && $role !== 'guru') {
+    http_response_code(403);
+    exit('Akses ditolak. Halaman ini hanya dapat diakses oleh Admin dan Guru Wali Kelas.');
+}
+
+// ============================================
+// 3. CEK GURU WALI KELAS
+// ============================================
+$id_guru = 0;
+
+if ($role === 'guru') {
+
+    $stmt_guru = mysqli_prepare(
+        $koneksi,
+        "SELECT g.id
+         FROM t_guru g
+         INNER JOIN t_wali_kelas wk ON wk.guru_id = g.id
+         WHERE g.user_id = ?
+           AND wk.status_aktif = 1
+         LIMIT 1"
+    );
+
+    if (!$stmt_guru) {
+        die("Query guru gagal: " . mysqli_error($koneksi));
+    }
+
+    mysqli_stmt_bind_param($stmt_guru, "i", $id_user);
+    mysqli_stmt_execute($stmt_guru);
+
+    $hasil_guru = mysqli_stmt_get_result($stmt_guru);
+    $data_guru = mysqli_fetch_assoc($hasil_guru);
+
+    mysqli_stmt_close($stmt_guru);
+
+    if (!$data_guru) {
+        http_response_code(403);
+        exit('Akses ditolak. Anda bukan Guru Wali Kelas yang aktif.');
+    }
+
+    $id_guru = (int) $data_guru['id'];
+}
+
+// ============================================
+// 4. FILTER TANGGAL
+// ============================================
+$tanggal_mulai = $_GET['tanggal_mulai'] ?? '';
+$tanggal_selesai = $_GET['tanggal_selesai'] ?? '';
+
+// Validasi format tanggal
+function validasiTanggal($tanggal)
+{
+    if ($tanggal === '') {
+        return true;
+    }
+
+    if (!preg_match('/^\d{4}-\d{2}-\d{2}$/', $tanggal)) {
+        return false;
+    }
+
+    $bagian = explode('-', $tanggal);
+
+    return checkdate(
+        (int) $bagian[1],
+        (int) $bagian[2],
+        (int) $bagian[0]
+    );
+}
+
+if (
+    !validasiTanggal($tanggal_mulai) ||
+    !validasiTanggal($tanggal_selesai)
+) {
+    exit('Format tanggal tidak valid.');
+}
+
+if (
+    $tanggal_mulai !== '' &&
+    $tanggal_selesai !== '' &&
+    $tanggal_mulai > $tanggal_selesai
+) {
+    exit('Tanggal mulai tidak boleh melebihi tanggal selesai.');
+}
+
+// ============================================
+// 5. QUERY LAPORAN
+// ============================================
+$sql = "SELECT
+            ps.id,
+            ps.tahun_ajaran_id,
+            ps.siswa_id,
+            ps.nama_siswa,
+            ps.kelas_id,
+            ps.nama_kelas,
+            ps.pelanggaran_id,
+            ps.nama_pelanggaran,
+            ps.pelanggaran_kategori_id,
+            ps.guru_id,
+            ps.nama_guru,
+            ps.tanggal,
+            ps.keterangan,
+            ps.poin,
+            ps.tindakan,
+            ps.status
+
         FROM t_pelanggaran_siswa ps
-        JOIN t_siswa s
-            ON ps.siswa_id = s.id
-        JOIN t_pelanggaran p
-            ON ps.pelanggaran_id = p.id
-        ORDER BY ps.id DESC
-    ";
+        WHERE 1 = 1";
 
-    $dataExcel = mysqli_query($koneksi, $sqlExcel);
+$types = "";
+$params = [];
 
-    if (!$dataExcel) {
-        die("Gagal mengambil data: " .
-            htmlspecialchars(mysqli_error($koneksi), ENT_QUOTES, 'UTF-8'));
-    }
+// Guru hanya melihat laporan kelas tanggung jawabnya
+if ($role === 'guru') {
 
-    // Header unduhan Excel
-    header("Content-Type: application/vnd.ms-excel; charset=utf-8");
-    header("Content-Disposition: attachment; filename=laporan_pelanggaran.xls");
-    header("Pragma: no-cache");
-    header("Expires: 0");
+    $sql .= " AND EXISTS (
+                SELECT 1
+                FROM t_wali_kelas wk
+                WHERE wk.guru_id = ?
+                  AND wk.kelas_id = ps.kelas_id
+                  AND wk.tahun_ajaran_id = ps.tahun_ajaran_id
+                  AND wk.status_aktif = 1
+            )";
 
-    // Membantu Excel membaca karakter UTF-8
-    echo "\xEF\xBB\xBF";
-
-    echo '<table border="1">';
-    echo '<tr>';
-    echo '<th>No</th>';
-    echo '<th>NIS</th>';
-    echo '<th>Nama Siswa</th>';
-    echo '<th>Kode Pelanggaran</th>';
-    echo '<th>Jenis Pelanggaran</th>';
-    echo '<th>Poin</th>';
-    echo '</tr>';
-
-    $no = 1;
-
-    while ($row = mysqli_fetch_assoc($dataExcel)) {
-        echo '<tr>';
-        echo '<td>' . $no++ . '</td>';
-        echo '<td>' . htmlspecialchars((string) $row['nis'], ENT_QUOTES, 'UTF-8') . '</td>';
-        echo '<td>' . htmlspecialchars((string) $row['nama_siswa'], ENT_QUOTES, 'UTF-8') . '</td>';
-        echo '<td>' . htmlspecialchars((string) ($row['kode'] ?? ''), ENT_QUOTES, 'UTF-8') . '</td>';
-        echo '<td>' . htmlspecialchars((string) $row['nama_pelanggaran'], ENT_QUOTES, 'UTF-8') . '</td>';
-        echo '<td>' . (int) $row['poin'] . '</td>';
-        echo '</tr>';
-    }
-
-    echo '</table>';
-
-    mysqli_free_result($dataExcel);
-    exit;
+    $types .= "i";
+    $params[] = $id_guru;
 }
 
-// Ambil data untuk ditampilkan di halaman laporan
-$sql = "
-    SELECT
-        ps.id,
-        s.nis,
-        s.nama AS nama_siswa,
-        p.kode,
-        p.nama AS nama_pelanggaran,
-        p.poin
-    FROM t_pelanggaran_siswa ps
-    JOIN t_siswa s
-        ON ps.siswa_id = s.id
-    JOIN t_pelanggaran p
-        ON ps.pelanggaran_id = p.id
-    ORDER BY ps.id DESC
-";
+// Filter tanggal mulai
+if ($tanggal_mulai !== '') {
 
-$hasil = mysqli_query($koneksi, $sql);
+    $sql .= " AND ps.tanggal >= ?";
 
-if (!$hasil) {
-    die("Gagal mengambil laporan: " .
-        htmlspecialchars(mysqli_error($koneksi), ENT_QUOTES, 'UTF-8'));
+    $types .= "s";
+    $params[] = $tanggal_mulai;
 }
+
+// Filter tanggal selesai
+if ($tanggal_selesai !== '') {
+
+    $sql .= " AND ps.tanggal <= ?";
+
+    $types .= "s";
+    $params[] = $tanggal_selesai;
+}
+
+// Urutkan tanggal terbaru
+$sql .= " ORDER BY ps.tanggal DESC, ps.id DESC";
+
+// ============================================
+// 6. EKSEKUSI QUERY
+// ============================================
+$stmt = mysqli_prepare($koneksi, $sql);
+
+if (!$stmt) {
+    die("Gagal menyiapkan laporan: " . htmlspecialchars(mysqli_error($koneksi)));
+}
+
+// Bind parameter
+if (!empty($params)) {
+
+    $bind_params = [$stmt, $types];
+
+    foreach ($params as $key => $value) {
+        $bind_params[] = &$params[$key];
+    }
+
+    call_user_func_array('mysqli_stmt_bind_param', $bind_params);
+}
+
+mysqli_stmt_execute($stmt);
+
+$hasil = mysqli_stmt_get_result($stmt);
 ?>
 
 <!DOCTYPE html>
 <html lang="id">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -104,308 +198,502 @@ if (!$hasil) {
 
     <!-- Bootstrap 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
-          rel="stylesheet">
-</head>
+        rel="stylesheet">
 
-<body>
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
-<main class="content">
+    <!-- Bootstrap Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
+        rel="stylesheet">
 
     <!-- DataTables -->
-    <link rel="stylesheet"
-          href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css">
+    <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css"
+        rel="stylesheet">
 
     <style>
-        body {
-            background-color: #f8f9fa;
-        }
 
-        main {
+        /* KONTEN UTAMA */
+        .content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            padding: 25px;
             min-height: 100vh;
         }
 
-        .card {
-            border: none;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+        /* HEADER TABEL */
+        #tabelLaporan thead th {
+            background-color: #212529 !important;
+            color: white !important;
+            border-color: #495057 !important;
+            vertical-align: middle;
+            white-space: nowrap;
         }
 
-        .judul-halaman {
-            font-weight: 600;
-            margin-bottom: 20px;
-        }
-
-        #tabelLaporan th,
-        #tabelLaporan td {
+        /* ISI TABEL */
+        #tabelLaporan tbody td {
             vertical-align: middle;
         }
 
-        .dataTables_wrapper {
-            padding-top: 10px;
+        /* FILTER LAPORAN */
+        .filter-card {
+            border-radius: 7px;
+            overflow: hidden;
         }
 
-        /* Pengaturan khusus saat mencetak atau menyimpan sebagai PDF */
-        @media print {
-            body {
-                background: #fff !important;
-                font-size: 12px;
-            }
+        .filter-card .card-header {
+            font-weight: 500;
+        }
 
-            .sidebar,
-            nav,
+        /* CARD LAPORAN */
+        .card {
+            border-radius: 7px;
+        }
+
+        /* TOMBOL CETAK */
+        @media print {
+
             .no-print,
-            .dataTables_filter,
-            .dataTables_length,
-            .dataTables_info,
-            .dataTables_paginate,
-            .dataTables_processing {
+            .sidebar,
+            #tabelLaporan_wrapper .dataTables_filter,
+            #tabelLaporan_wrapper .dataTables_length,
+            #tabelLaporan_wrapper .dataTables_paginate,
+            #tabelLaporan_wrapper .dataTables_info {
                 display: none !important;
             }
 
-            main {
-                width: 100% !important;
-                max-width: 100% !important;
-                flex: 0 0 100% !important;
-                min-height: auto !important;
-                padding: 0 !important;
-            }
-
-            .container-fluid,
-            .row {
-                display: block !important;
+            .content {
                 width: 100% !important;
                 margin: 0 !important;
                 padding: 0 !important;
             }
 
-            .card {
-                border: none !important;
-                box-shadow: none !important;
+            body {
+                font-size: 11px;
             }
 
-            .card-header {
-                border: none !important;
-                padding: 0 0 10px 0 !important;
-            }
-
-            .card-body {
-                padding: 0 !important;
-            }
-
-            .table-responsive {
-                overflow: visible !important;
-            }
-
-            #tabelLaporan {
+            table {
                 width: 100% !important;
-                border-collapse: collapse !important;
-                font-size: 10px;
             }
 
-            #tabelLaporan th,
-            #tabelLaporan td {
-                border: 1px solid #000 !important;
-                padding: 5px !important;
-                color: #000 !important;
-                background: #fff !important;
-            }
-
-            h3,
-            h5 {
-                color: #000 !important;
-            }
-
-            @page {
-                size: landscape;
-                margin: 1.5cm;
-            }
         }
+
+        /* RESPONSIVE */
+        @media (max-width: 767.98px) {
+
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding: 15px;
+            }
+
+        }
+
     </style>
+
 </head>
 
 <body>
 
 <div class="container-fluid">
+
     <div class="row">
 
         <!-- SIDEBAR -->
         <?php include 'layout/sidebar.php'; ?>
 
+
         <!-- KONTEN UTAMA -->
-        <main class="col-md-9 col-lg-10 p-4">
+        <main class="content">
 
-            <h3 class="judul-halaman">Laporan Pelanggaran Siswa</h3>
+            <!-- JUDUL HALAMAN -->
+            <h2 class="mb-3">
+                Laporan Pelanggaran Siswa
+            </h2>
 
-            <div class="card">
+            <p class="text-muted">
+                Halaman laporan data pelanggaran siswa.
+            </p>
 
-                <div class="card-header bg-white d-flex
-                            justify-content-between align-items-center">
 
-                    <h5 class="mb-0">Data Laporan Pelanggaran</h5>
+            <!-- INFORMASI AKSES -->
+            <div class="alert alert-info no-print">
 
-                    <div class="no-print">
-                        <!-- Tombol Cetak PDF -->
-                        <button type="button"
-                                onclick="cetakPDF()"
-                                class="btn btn-danger btn-sm">
-                            Cetak PDF
-                        </button>
+                <?php if ($role === 'admin') { ?>
 
-                        <!-- Tombol Export Excel -->
-                        <a href="laporan.php?export=excel"
-                           class="btn btn-success btn-sm">
-                            Export Excel
-                        </a>
-                    </div>
+                    Anda login sebagai <strong>Admin</strong>.
+                    Anda dapat melihat seluruh laporan pelanggaran siswa.
+
+                <?php } else { ?>
+
+                    Anda login sebagai <strong>Guru Wali Kelas</strong>.
+                    Anda hanya dapat melihat laporan dari kelas yang menjadi tanggung jawab Anda.
+
+                <?php } ?>
+
+            </div>
+
+
+            <!-- ================================= -->
+            <!-- FILTER LAPORAN -->
+            <!-- ================================= -->
+
+            <div class="card shadow-sm mb-4 filter-card no-print">
+
+                <!-- HEADER FILTER -->
+                <div class="card-header bg-primary text-white">
+
+                    <i class="bi bi-funnel"></i>
+                    Filter Laporan
 
                 </div>
 
+
+                <!-- BODY FILTER -->
                 <div class="card-body">
 
-                    <div class="mb-3 no-print">
-                        <a href="dashboard.php"
-                           class="btn btn-secondary btn-sm">
-                            Kembali ke Dashboard
-                        </a>
-                    </div>
+                    <form method="GET" action="laporan.php">
+
+                        <div class="row align-items-end">
+
+                            <!-- TANGGAL MULAI -->
+                            <div class="col-md-4 mb-3">
+
+                                <label for="tanggal_mulai" class="form-label">
+                                    Tanggal Mulai
+                                </label>
+
+                                <input
+                                    type="date"
+                                    name="tanggal_mulai"
+                                    id="tanggal_mulai"
+                                    class="form-control"
+                                    value="<?= htmlspecialchars($tanggal_mulai); ?>"
+                                >
+
+                            </div>
+
+
+                            <!-- TANGGAL SELESAI -->
+                            <div class="col-md-4 mb-3">
+
+                                <label for="tanggal_selesai" class="form-label">
+                                    Tanggal Selesai
+                                </label>
+
+                                <input
+                                    type="date"
+                                    name="tanggal_selesai"
+                                    id="tanggal_selesai"
+                                    class="form-control"
+                                    value="<?= htmlspecialchars($tanggal_selesai); ?>"
+                                >
+
+                            </div>
+
+
+                            <!-- TOMBOL FILTER -->
+                            <div class="col-md-4 mb-3">
+
+                                <button type="submit" class="btn btn-primary">
+
+                                    <i class="bi bi-search"></i>
+                                    Tampilkan
+
+                                </button>
+
+                                <a href="laporan.php" class="btn btn-secondary">
+
+                                    <i class="bi bi-arrow-counterclockwise"></i>
+                                    Reset
+
+                                </a>
+
+                            </div>
+
+                        </div>
+
+                    </form>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================================= -->
+            <!-- DATA LAPORAN -->
+            <!-- ================================= -->
+
+            <div class="card shadow-sm">
+
+                <!-- HEADER CARD -->
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+
+                    <span>
+                        <i class="bi bi-file-earmark-text"></i>
+                        Data Laporan Pelanggaran
+                    </span>
+
+                    <button
+                        type="button"
+                        onclick="window.print()"
+                        class="btn btn-light btn-sm no-print">
+
+                        <i class="bi bi-printer"></i>
+                        Cetak Laporan
+
+                    </button>
+
+                </div>
+
+
+                <!-- BODY CARD -->
+                <div class="card-body">
 
                     <div class="table-responsive">
 
-                        <table id="tabelLaporan"
-                               class="table table-striped table-bordered table-hover"
-                               style="width:100%">
+                        <table
+                            id="tabelLaporan"
+                            class="table table-striped table-bordered table-hover align-middle w-100">
 
-                            <thead class="thead-dark">
+                            <!-- HEADER TABEL -->
+                            <thead>
+
                                 <tr>
-                                    <th>No.</th>
-                                    <th>NIS</th>
+
+                                    <th>No</th>
                                     <th>Nama Siswa</th>
-                                    <th>Kode Pelanggaran</th>
-                                    <th>Jenis Pelanggaran</th>
+                                    <th>Kelas</th>
+                                    <th>Nama Pelanggaran</th>
+                                    <th>Guru Pencatat</th>
+                                    <th>Tanggal</th>
                                     <th>Poin</th>
+                                    <th>Tindakan</th>
+                                    <th>Status</th>
+
                                 </tr>
+
                             </thead>
 
+
+                            <!-- ISI TABEL -->
                             <tbody>
+
                                 <?php
-                                $no = 1;
+                                $nomor = 1;
 
                                 while ($row = mysqli_fetch_assoc($hasil)) {
                                 ?>
+
                                     <tr>
-                                        <td><?= $no++; ?></td>
 
+                                        <!-- NOMOR -->
+                                        <td></td>
+
+
+                                        <!-- NAMA SISWA -->
                                         <td>
-                                            <?= htmlspecialchars(
-                                                (string) $row['nis'],
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ); ?>
+                                            <?= htmlspecialchars($row['nama_siswa'] ?? '-'); ?>
                                         </td>
 
+
+                                        <!-- KELAS -->
                                         <td>
-                                            <?= htmlspecialchars(
-                                                (string) $row['nama_siswa'],
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ); ?>
+                                            <?= htmlspecialchars($row['nama_kelas'] ?? '-'); ?>
                                         </td>
 
+
+                                        <!-- NAMA PELANGGARAN -->
                                         <td>
-                                            <?= htmlspecialchars(
-                                                (string) ($row['kode'] ?? ''),
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ); ?>
+                                            <?= htmlspecialchars($row['nama_pelanggaran'] ?? '-'); ?>
                                         </td>
 
+
+                                        <!-- GURU PENCATAT -->
                                         <td>
-                                            <?= htmlspecialchars(
-                                                (string) $row['nama_pelanggaran'],
-                                                ENT_QUOTES,
-                                                'UTF-8'
-                                            ); ?>
+                                            <?= htmlspecialchars($row['nama_guru'] ?? '-'); ?>
                                         </td>
 
-                                        <td><?= (int) $row['poin']; ?></td>
+
+                                        <!-- TANGGAL -->
+                                        <td>
+                                            <?= htmlspecialchars($row['tanggal'] ?? '-'); ?>
+                                        </td>
+
+
+                                        <!-- POIN -->
+                                        <td>
+                                            <?= (int) ($row['poin'] ?? 0); ?>
+                                        </td>
+
+
+                                        <!-- TINDAKAN -->
+                                        <td>
+                                            <?= htmlspecialchars($row['tindakan'] ?? '-'); ?>
+                                        </td>
+
+
+                                        <!-- STATUS -->
+                                        <td>
+
+                                            <?php
+
+                                            $status = $row['status'] ?? '-';
+
+                                            if ($status === 'Selesai') {
+
+                                                echo '<span class="badge bg-success">Selesai</span>';
+
+                                            } elseif ($status === 'Diproses') {
+
+                                                echo '<span class="badge bg-warning text-dark">Diproses</span>';
+
+                                            } else {
+
+                                                echo '<span class="badge bg-secondary">' .
+                                                    htmlspecialchars($status) .
+                                                    '</span>';
+
+                                            }
+
+                                            ?>
+
+                                        </td>
+
                                     </tr>
+
                                 <?php } ?>
+
                             </tbody>
 
                         </table>
 
                     </div>
+
                 </div>
+
+            </div>
+
+
+            <!-- TOMBOL KEMBALI -->
+            <div class="mt-3 no-print">
+
+                <a href="dashboard.php" class="btn btn-secondary">
+
+                    <i class="bi bi-arrow-left"></i>
+                    Kembali ke Dashboard
+
+                </a>
+
             </div>
 
         </main>
+
     </div>
+
 </div>
 
+
+<!-- ================================= -->
+<!-- JAVASCRIPT -->
+<!-- ================================= -->
+
+<!-- jQuery -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Bootstrap -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
+<!-- DataTables -->
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 
-<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
+<!-- DataTables Bootstrap -->
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
+
+<!-- INISIALISASI DATATABLES -->
 <script>
-let panjangHalamanSebelumCetak = 10;
 
 $(document).ready(function () {
+
     $('#tabelLaporan').DataTable({
+
         language: {
+
             search: "Cari:",
+
             lengthMenu: "Tampilkan _MENU_ data",
+
             info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
-            infoEmpty: "Tidak ada data",
+
+            infoEmpty: "Tidak ada data laporan",
+
             infoFiltered: "(difilter dari _MAX_ total data)",
-            zeroRecords: "Data tidak ditemukan",
-            emptyTable: "Belum ada laporan pelanggaran",
+
+            zeroRecords: "Data laporan tidak ditemukan",
+
+            emptyTable: "Belum ada data pelanggaran",
+
             paginate: {
+
                 first: "Pertama",
+
                 last: "Terakhir",
+
                 next: "Berikutnya",
+
                 previous: "Sebelumnya"
+
             }
+
         },
+
         pageLength: 10,
+
         lengthMenu: [5, 10, 25, 50, 100],
-        order: [[2, 'asc']],
+
+        order: [[5, 'desc']],
+
+        scrollX: true,
+
+        autoWidth: false,
+
         columnDefs: [
+
             {
                 targets: 0,
                 orderable: false,
                 searchable: false
             }
-        ]
+
+        ],
+
+        // NOMOR URUT OTOMATIS
+        drawCallback: function () {
+
+            var api = this.api();
+
+            var info = api.page.info();
+
+            api.column(0, {
+                page: 'current'
+            }).nodes().each(function (cell, i) {
+
+                cell.innerHTML = info.start + i + 1;
+
+            });
+
+        }
+
     });
+
 });
 
-// Fungsi cetak PDF melalui menu cetak browser
-function cetakPDF() {
-    const tabel = $('#tabelLaporan').DataTable();
-
-    // Tampilkan semua data sebelum mencetak
-    panjangHalamanSebelumCetak = tabel.page.len();
-    tabel.page.len(-1).draw();
-
-    // Beri waktu untuk memperbarui tabel sebelum membuka dialog cetak
-    setTimeout(function () {
-        window.print();
-    }, 300);
-}
-
-// Kembalikan jumlah data per halaman setelah dialog cetak ditutup
-window.addEventListener('afterprint', function () {
-    const tabel = $('#tabelLaporan').DataTable();
-    tabel.page.len(panjangHalamanSebelumCetak).draw();
-});
 </script>
 
 </body>
 </html>
+
+<?php
+
+// TUTUP STATEMENT
+mysqli_stmt_close($stmt);
+
+?>
