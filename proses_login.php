@@ -2,7 +2,10 @@
 <?php
 // proses_login.php
 
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 include 'config/koneksi.php';
 
 // Mengambil input
@@ -16,14 +19,14 @@ if ($email === '' || $password === '') {
     exit;
 }
 
-// Mencari akun berdasarkan email
+// Mencari akun
 $stmt = mysqli_prepare(
     $koneksi,
     "SELECT * FROM t_users WHERE email = ? LIMIT 1"
 );
 
 if (!$stmt) {
-    $_SESSION['pesan_error'] = "Terjadi kesalahan pada database.";
+    $_SESSION['pesan_error'] = "Terjadi kesalahan database.";
     header("Location: login.php");
     exit;
 }
@@ -37,37 +40,30 @@ $data = mysqli_fetch_assoc($hasil);
 mysqli_stmt_close($stmt);
 
 // Memeriksa akun
-if ($data) {
-
-    if (password_verify($password, $data['password'])) {
-
-        // Membuat session baru setelah login berhasil
-        session_regenerate_id(true);
-
-        $_SESSION['login'] = true;
-        $_SESSION['id'] = $data['id'];
-        $_SESSION['name'] = $data['name'];
-        $_SESSION['role'] = $data['role'];
-
-        // Membersihkan pesan error lama
-        unset($_SESSION['pesan_error']);
-
-        header("Location: dashboard.php");
-        exit;
-
-    } else {
-
-        $_SESSION['pesan_error'] = "Password salah!";
-        header("Location: login.php");
-        exit;
-
-    }
-
-} else {
-
+if (!$data) {
     $_SESSION['pesan_error'] = "Email tidak ditemukan!";
     header("Location: login.php");
     exit;
-
 }
+
+// Memeriksa password
+if (!password_verify($password, $data['password'])) {
+    $_SESSION['pesan_error'] = "Password salah!";
+    header("Location: login.php");
+    exit;
+}
+
+// Membuat session login
+session_regenerate_id(true);
+
+$_SESSION['login'] = true;
+$_SESSION['id'] = $data['id'];
+$_SESSION['name'] = $data['name'];
+$_SESSION['role'] = $data['role'];
+
+unset($_SESSION['pesan_error']);
+
+// Masuk dashboard
+header("Location: dashboard.php");
+exit;
 ?>

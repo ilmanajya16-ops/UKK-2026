@@ -11,8 +11,7 @@ if (
     $_SESSION['login'] !== true ||
     !isset($_SESSION['id'])
 ) {
-    $_SESSION['pesan_error'] = "Sesi login tidak ditemukan. Silakan login kembali.";
-
+    $_SESSION['pesan_error'] = "Sesi login tidak ditemukan. Silakan login kembali!";
     header("Location: login.php");
     exit;
 }
