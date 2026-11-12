@@ -6,20 +6,23 @@ include 'config/koneksi.php';
 $nip = $_POST['nip'];
 $nama = $_POST['nama'];
 $email = $_POST['email'];
+$users = $_POST['users'];
 $status_aktif = $_POST['status_aktif'];
-$user_id = $_POST['user_id'];
 
-$sql = "INSERT INTO t_guru 
-        (nip, nama, email, status_aktif, user_id)
-        VALUES 
-        ('$nip', '$nama', '$email', '$status_aktif', '$user_id')";
 
-$hasil = mysqli_query($koneksi, $sql);
+$sql = "INSERT INTO t_guru
+        (nip, nama, email, user, status_aktif)
+        VALUES
+        ('$nip','$nama','$email','users','$status_aktif',)";
 
-if ($hasil) {
-    header("Location: kelola_guru.php");
+if (mysqli_query($koneksi, $sql)) {
+
+    header("Location:kelola_guru.php");
     exit;
+
 } else {
+
     echo "Gagal menambahkan data guru: " . mysqli_error($koneksi);
+
 }
 ?>

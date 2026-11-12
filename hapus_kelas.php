@@ -16,14 +16,24 @@ $cek = mysqli_query(
 $data = mysqli_fetch_assoc($cek);
 
 // Hapus data kelas
-$sql = "DELETE FROM t_kelas WHERE id = '$id'";
+// Hapus data
+$stmt = mysqli_prepare(
+    $koneksi,
+    "DELETE FROM t_kelas WHERE id = ?"
+);
 
-if (mysqli_query($koneksi, $sql)) {
+mysqli_stmt_bind_param($stmt, "i", $id);
 
-    $id_user = $_SESSION['id_user'];
-    $waktu = date('Y-m-d H:i:s');
+if (mysqli_stmt_execute($stmt)) {
+    mysqli_stmt_close($stmt);
 
-    $aktivitas = "hapus kelas: " . $data['nama'];
+    $_SESSION['pesan_sukses'] =
+        'hapus kelas "' . $data['nama'] .
+        '" berhasil dihapus.';
+
+    header('Location: kelola_kelas.php');
+    exit;
+}
 
     // Simpan aktivitas ke tabel log
     $log = "INSERT INTO tbl_log
@@ -32,7 +42,7 @@ if (mysqli_query($koneksi, $sql)) {
             ('$id_user', '$aktivitas', '$waktu')";
 
     mysqli_query($koneksi, $log);
-}
+
 
 header('Location: kelola_kelas.php');
 exit;
