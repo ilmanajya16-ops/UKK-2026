@@ -638,21 +638,19 @@ if (!$hasil) {
             <i class="bi bi-pencil-square"></i> Edit
         </a>
 
-        <form action="hapus_pelanggaran.php"
-              method="POST"
-              onsubmit="return confirm('Yakin ingin menghapus catatan pelanggaran ini?');">
+  <form action="hapus_catat_pelanggaran.php"
+      method="POST"
+      onsubmit="return confirm('Yakin ingin menghapus catatan pelanggaran ini?');">
 
-            <input type="hidden"
-                   name="id"
-                   value="<?= (int) $row['id']; ?>">
+    <input type="hidden"
+           name="id"
+           value="<?= (int) $row['id']; ?>">
 
-            <button type="submit" class="btn btn-danger btn-sm">
-                <i class="bi bi-trash"></i> Hapus
-            </button>
-        </form>
-    </div>
-</td>
+    <button type="submit" class="btn btn-danger btn-sm">
+        <i class="bi bi-trash"></i> Hapus
+    </button>
 
+</form>
                                 </tr>
 
                             <?php } ?>

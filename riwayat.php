@@ -1,4 +1,3 @@
-
 <?php
 // riwayat.php
 
@@ -44,14 +43,29 @@ $cari = isset($_GET['cari'])
 $status = isset($_GET['status'])
     ? mysqli_real_escape_string($koneksi, trim($_GET['status']))
     : '';
-$sql = "SELECT *
-        FROM t_pelanggaran_siswa
-        WHERE 1=1";
+$sql = "SELECT
+            ps.id,
+            ps.tanggal,
+            ps.poin,
+            ps.keterangan,
+            ps.tindakan,
+            ps.status,
+            COALESCE(NULLIF(ps.nama_siswa, ''), s.nama, '-')       AS nama_siswa,
+            COALESCE(NULLIF(ps.nama_kelas, ''), k.nama, '-')       AS nama_kelas,
+            COALESCE(NULLIF(ps.nama_pelanggaran, ''), p.nama, '-') AS nama_pelanggaran,
+            COALESCE(NULLIF(ps.nama_guru, ''), g.nama, '-')        AS nama_guru
+        FROM t_pelanggaran_siswa ps
+        LEFT JOIN t_siswa s       ON s.id = ps.siswa_id
+        LEFT JOIN t_kelas k       ON k.id = ps.kelas_id
+        LEFT JOIN t_pelanggaran p ON p.id = ps.pelanggaran_id
+        LEFT JOIN t_guru g        ON g.id = ps.guru_id
+        WHERE 1=1
+          AND LOWER(TRIM(COALESCE(ps.status, ''))) <> 'selesai'";
 
 if (($_SESSION['role'] ?? '') == 'guru') {
 
     if ($guru_id > 0) {
-        $sql .= " AND guru_id = $guru_id";
+        $sql .= " AND ps.guru_id = " . (int) $guru_id;
     } else {
         $sql .= " AND 1=0";
     }
@@ -61,20 +75,20 @@ if (($_SESSION['role'] ?? '') == 'guru') {
 // Pencarian berdasarkan nama siswa, pelanggaran, kelas, atau guru
 if ($cari != '') {
     $sql .= " AND (
-        nama_siswa LIKE '%$cari%'
-        OR nama_pelanggaran LIKE '%$cari%'
-        OR nama_kelas LIKE '%$cari%'
-        OR nama_guru LIKE '%$cari%'
+        COALESCE(NULLIF(ps.nama_siswa, ''), s.nama) LIKE '%$cari%'
+        OR COALESCE(NULLIF(ps.nama_pelanggaran, ''), p.nama) LIKE '%$cari%'
+        OR COALESCE(NULLIF(ps.nama_kelas, ''), k.nama) LIKE '%$cari%'
+        OR COALESCE(NULLIF(ps.nama_guru, ''), g.nama) LIKE '%$cari%'
     )";
 }
 
-// Filter berdasarkan status
+// Filter berdasarkan status (nilai sama dengan yang disimpan di database)
 if ($status != '') {
-    $sql .= " AND status = '$status'";
+    $sql .= " AND ps.status = '$status'";
 }
 
 // Urutkan berdasarkan tanggal terbaru
-$sql .= " ORDER BY tanggal DESC, id DESC";
+$sql .= " ORDER BY ps.tanggal DESC, ps.id DESC";
 
 // Menjalankan query
 $query = mysqli_query($koneksi, $sql);
@@ -236,14 +250,14 @@ $jumlah = mysqli_num_rows($query);
 
                                 <option value="">Semua Status</option>
 
-                                <option value="belum"
-                                    <?= $status == 'belum' ? 'selected' : ''; ?>>
-                                    Belum Ditindak
+                                <option value="Ditindaklanjuti"
+                                    <?= $status == 'Ditindaklanjuti' ? 'selected' : ''; ?>>
+                                    Ditindaklanjuti
                                 </option>
 
-                                <option value="selesai"
-                                    <?= $status == 'selesai' ? 'selected' : ''; ?>>
-                                    Selesai
+                                <option value="Proses"
+                                    <?= $status == 'Proses' ? 'selected' : ''; ?>>
+                                    Proses
                                 </option>
 
                             </select>
@@ -336,7 +350,7 @@ $jumlah = mysqli_num_rows($query);
                                     </td>
 
                                     <td>
-                                        <?= htmlspecialchars($data['tindakan'] ?? '-'); ?>
+                                        <?= htmlspecialchars(trim((string) ($data['tindakan'] ?? '')) !== '' ? $data['tindakan'] : '-'); ?>
                                     </td>
 
                                     <td>
@@ -346,16 +360,13 @@ $jumlah = mysqli_num_rows($query);
                                             trim($data['status'] ?? '')
                                         );
 
-                                        if ($status_data == 'selesai') {
+                                        if ($status_data == 'proses') {
 
-                                            echo '<span class="badge bg-success">Selesai</span>';
+                                            echo '<span class="badge bg-warning text-dark">Proses</span>';
 
-                                        } elseif (
-                                            $status_data == 'belum' ||
-                                            $status_data == 'belum ditindak'
-                                        ) {
+                                        } elseif ($status_data == 'ditindaklanjuti') {
 
-                                            echo '<span class="badge bg-danger">Belum Ditindak</span>';
+                                            echo '<span class="badge bg-info text-dark">Ditindaklanjuti</span>';
 
                                         } else {
 

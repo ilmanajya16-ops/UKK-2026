@@ -1,4 +1,3 @@
-
 <?php
 // proses_simpan_pelanggaran.php
 
@@ -80,7 +79,7 @@ $id_user = (int) ($_SESSION['id'] ?? 0);
 
 $stmt_guru = mysqli_prepare(
     $koneksi,
-    "SELECT id
+    "SELECT id, nama
      FROM t_guru
      WHERE user_id = ?
        AND status_aktif = 1
@@ -106,6 +105,7 @@ if (!$data_guru) {
 }
 
 $guru_id = (int) $data_guru['id'];
+$nama_guru = (string) $data_guru['nama'];
 
 
 // ==========================================
@@ -113,10 +113,12 @@ $guru_id = (int) $data_guru['id'];
 // ==========================================
 $stmt_siswa = mysqli_prepare(
     $koneksi,
-    "SELECT ks.kelas_id
+    "SELECT ks.kelas_id, s.nama AS nama_siswa, k.nama AS nama_kelas
      FROM t_siswa s
      INNER JOIN t_kelas_siswa ks
         ON ks.siswa_id = s.id
+     INNER JOIN t_kelas k
+        ON k.id = ks.kelas_id
      WHERE s.id = ?
        AND s.status_aktif = 1
        AND ks.tahun_ajaran_id = ?
@@ -149,6 +151,8 @@ if (!$data_siswa) {
 }
 
 $kelas_id = (int) $data_siswa['kelas_id'];
+$nama_siswa = (string) $data_siswa['nama_siswa'];
+$nama_kelas = (string) $data_siswa['nama_kelas'];
 
 
 // ==========================================
@@ -158,7 +162,7 @@ $pelanggaran_id = (int) ($_POST['pelanggaran_id'] ?? 0);
 
 $stmt_pelanggaran = mysqli_prepare(
     $koneksi,
-    "SELECT id, poin, pelanggaran_kategori_id
+    "SELECT id, nama, poin, pelanggaran_kategori_id
      FROM t_pelanggaran
      WHERE id = ?
        AND status_aktif = 1
@@ -189,6 +193,7 @@ if (!$data_pelanggaran) {
 }
 
 $poin = (int) $data_pelanggaran['poin'];
+$nama_pelanggaran = (string) $data_pelanggaran['nama'];
 $kategori_id = (int) $data_pelanggaran['pelanggaran_kategori_id'];
 
 
@@ -200,17 +205,21 @@ $stmt_simpan = mysqli_prepare(
     "INSERT INTO t_pelanggaran_siswa
     (
         siswa_id,
+        nama_siswa,
         kelas_id,
+        nama_kelas,
         tahun_ajaran_id,
         pelanggaran_id,
+        nama_pelanggaran,
         pelanggaran_kategori_id,
         guru_id,
+        nama_guru,
         tanggal,
         poin,
         status,
         keterangan
     )
-    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"
 );
 
 if (!$stmt_simpan) {
@@ -219,13 +228,17 @@ if (!$stmt_simpan) {
 
 mysqli_stmt_bind_param(
     $stmt_simpan,
-    "iiiiiisiss",
+    "isisiisiississ",
     $siswa_id,
+    $nama_siswa,
     $kelas_id,
+    $nama_kelas,
     $tahun_ajaran_id,
     $pelanggaran_id,
+    $nama_pelanggaran,
     $kategori_id,
     $guru_id,
+    $nama_guru,
     $tanggal,
     $poin,
     $status,

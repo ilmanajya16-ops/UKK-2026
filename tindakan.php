@@ -1,4 +1,3 @@
-
 <?php
 // tindakan.php
 
@@ -43,11 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (mysqli_stmt_execute($stmt)) {
 
-        if (mysqli_stmt_affected_rows($stmt) >= 0) {
-            $_SESSION['pesan_sukses'] = "Tindakan berhasil disimpan.";
-        } else {
-            $_SESSION['pesan_error'] = "Tindakan gagal disimpan.";
-        }
+        $_SESSION['pesan_sukses'] = "Tindakan berhasil disimpan.";
 
     } else {
 
@@ -83,17 +78,20 @@ if (isset($_SESSION['pesan_error'])) {
 // ============================================
 
 $sql = "SELECT
-            id,
-            nama_siswa,
-            nama_kelas,
-            nama_pelanggaran,
-            tanggal,
-            keterangan,
-            tindakan
-        FROM t_pelanggaran_siswa
-        WHERE tindakan IS NULL
-           OR TRIM(tindakan) = ''
-        ORDER BY tanggal DESC";
+            ps.id,
+            COALESCE(NULLIF(ps.nama_siswa, ''), s.nama, '-')           AS nama_siswa,
+            COALESCE(NULLIF(ps.nama_kelas, ''), k.nama, '-')           AS nama_kelas,
+            COALESCE(NULLIF(ps.nama_pelanggaran, ''), p.nama, '-')     AS nama_pelanggaran,
+            ps.tanggal,
+            ps.keterangan,
+            ps.tindakan
+        FROM t_pelanggaran_siswa ps
+        LEFT JOIN t_siswa s       ON s.id = ps.siswa_id
+        LEFT JOIN t_kelas k       ON k.id = ps.kelas_id
+        LEFT JOIN t_pelanggaran p ON p.id = ps.pelanggaran_id
+        WHERE ps.tindakan IS NULL
+           OR TRIM(ps.tindakan) = ''
+        ORDER BY ps.tanggal DESC, ps.id DESC";
 
 $hasil = mysqli_query($koneksi, $sql);
 
@@ -309,7 +307,7 @@ if (!$hasil) {
                                     </td>
 
                                     <td>
-                                        <?= htmlspecialchars($row['keterangan'] ?? '-'); ?>
+                                        <?= htmlspecialchars(trim((string) ($row['keterangan'] ?? '')) !== '' ? $row['keterangan'] : '-'); ?>
                                     </td>
 
                                     <!-- FORM TINDAKAN -->
