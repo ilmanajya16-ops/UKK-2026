@@ -1,9 +1,14 @@
 
 <?php
+// kelola_siswa.php
+
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
-// Mengambil data siswa
+// ========================================
+// MENGAMBIL DATA SISWA
+// ========================================
+
 $sql = "SELECT * FROM t_siswa ORDER BY nama ASC";
 $hasil = mysqli_query($koneksi, $sql);
 
@@ -16,29 +21,22 @@ if (!$hasil) {
 <html lang="id">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <title>Kelola Siswa</title>
 
-        <!-- Bootstrap 5 -->
+    <!-- BOOTSTRAP 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
           rel="stylesheet">
-</head>
 
-<body>
-<script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/popper.js@1.14.3/dist/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.min.js" integrity="sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy" crossorigin="anonymous"></script>
-
-<div class="container-fluid">
-    <div class="row">
-
-    <!-- DataTables CSS -->
+    <!-- DATATABLES BOOTSTRAP 5 -->
     <link rel="stylesheet"
-        href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap4.min.css">
+          href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css">
 
     <style>
+
         body {
             background-color: #f5f6fa;
         }
@@ -63,7 +61,8 @@ if (!$hasil) {
 
         .tombol-aksi {
             display: flex;
-            gap: 5px;
+            gap: 8px;
+            flex-wrap: wrap;
             margin-bottom: 20px;
         }
 
@@ -71,21 +70,89 @@ if (!$hasil) {
             padding: 10px 14px;
         }
 
-        .table th,
-        .table td {
-            vertical-align: middle;
-            white-space: nowrap;
-        }
-
         .table-responsive {
+            width: 100%;
             overflow-x: auto;
         }
+
+        /* ==================================
+           TABEL SISWA
+        ================================== */
+
+        #tabelSiswa {
+            width: 100% !important;
+            border-collapse: collapse !important;
+            background-color: #ffffff !important;
+        }
+
+        /* HEADER TABEL PUTIH */
+
+        #tabelSiswa thead th {
+            background-color: #ffffff !important;
+            color: #212529 !important;
+            text-align: center !important;
+            vertical-align: middle !important;
+            padding: 12px !important;
+            white-space: nowrap;
+            border: 1px solid #dee2e6 !important;
+            font-weight: 600;
+        }
+
+        /* ISI TABEL */
+
+        #tabelSiswa tbody td {
+            vertical-align: middle !important;
+            padding: 10px !important;
+            white-space: nowrap;
+            border: 1px solid #dee2e6 !important;
+        }
+
+        /* BARIS SELANG-SELING */
+
+        #tabelSiswa tbody tr:nth-child(even) {
+            background-color: #f2f2f2 !important;
+        }
+
+        #tabelSiswa tbody tr:nth-child(odd) {
+            background-color: #ffffff !important;
+        }
+
+        /* HOVER */
+
+        #tabelSiswa tbody tr:hover {
+            background-color: #e9ecef !important;
+        }
+
+        /* DATATABLES */
+
+        .dataTables_wrapper {
+            width: 100%;
+        }
+
+        .dataTables_filter {
+            margin-bottom: 15px;
+        }
+
+        .dataTables_length {
+            margin-bottom: 15px;
+        }
+
+        .dataTables_info {
+            padding-top: 12px !important;
+        }
+
+        .dataTables_paginate {
+            padding-top: 8px !important;
+        }
+
     </style>
+
 </head>
 
 <body>
 
 <div class="container-fluid">
+
     <div class="row">
 
         <!-- SIDEBAR -->
@@ -95,9 +162,13 @@ if (!$hasil) {
         <main class="col-md-9 col-lg-10 content">
 
             <div class="card shadow-sm">
+
                 <div class="card-body">
 
-                    <h2 class="mb-3">Kelola Siswa</h2>
+                    <!-- JUDUL -->
+                    <h2 class="mb-3">
+                        Kelola Siswa
+                    </h2>
 
                     <!-- TOMBOL -->
                     <div class="tombol-aksi">
@@ -115,11 +186,14 @@ if (!$hasil) {
                     <!-- TABEL SISWA -->
                     <div class="table-responsive">
 
-                        <table id="tabelSiswa"
+                        <table
+                            id="tabelSiswa"
                             class="table table-striped table-bordered"
-                            style="width:100%">
+                            style="width:100%"
+                        >
 
-                            <thead class="thead-dark">
+                            <thead>
+
                                 <tr>
                                     <th>No</th>
                                     <th>NIS</th>
@@ -131,6 +205,7 @@ if (!$hasil) {
                                     <th>Status Aktif</th>
                                     <th>Aksi</th>
                                 </tr>
+
                             </thead>
 
                             <tbody>
@@ -139,82 +214,111 @@ if (!$hasil) {
                                 $no = 1;
 
                                 while ($siswa = mysqli_fetch_assoc($hasil)) {
+
                                     $nis = $siswa['nis'] ?? '';
+
+                                    // ==================================
+                                    // KONVERSI JENIS KELAMIN
+                                    // ==================================
+
+                                    $jk = strtoupper(trim($siswa['jenis_kelamin'] ?? ''));
+
+                                    if ($jk === 'L') {
+                                        $jenis_kelamin = 'Laki-laki';
+                                    } elseif ($jk === 'P') {
+                                        $jenis_kelamin = 'Perempuan';
+                                    } else {
+                                        $jenis_kelamin = $siswa['jenis_kelamin'] ?? '-';
+                                    }
                                 ?>
 
-                                <tr>
-                                    <td><?= $no++ ?></td>
+                                    <tr>
 
-                                    <td>
-                                        <?= htmlspecialchars($siswa['nis'] ?? '') ?>
-                                    </td>
+                                        <td>
+                                            <?= $no++; ?>
+                                        </td>
 
-                                    <td>
-                                        <?= htmlspecialchars($siswa['nisn'] ?? '') ?>
-                                    </td>
+                                        <td>
+                                            <?= htmlspecialchars($nis, ENT_QUOTES, 'UTF-8'); ?>
+                                        </td>
 
-                                    <td>
-                                        <?= htmlspecialchars($siswa['nama'] ?? '') ?>
-                                    </td>
+                                        <td>
+                                            <?= htmlspecialchars($siswa['nisn'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                                        </td>
 
-                                    <td>
-                                        <?= htmlspecialchars($siswa['jenis_kelamin'] ?? '') ?>
-                                    </td>
+                                        <td>
+                                            <?= htmlspecialchars($siswa['nama'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                                        </td>
 
-                                    <td>
-                                        <?= htmlspecialchars($siswa['tanggal_lahir'] ?? '') ?>
-                                    </td>
+                                        <td>
+                                            <?= htmlspecialchars($jenis_kelamin, ENT_QUOTES, 'UTF-8'); ?>
+                                        </td>
 
-                                    <td>
-                                        <?= htmlspecialchars($siswa['alamat'] ?? '') ?>
-                                    </td>
+                                        <td>
+                                            <?= htmlspecialchars($siswa['tanggal_lahir'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                                        </td>
 
-                                    <td>
-                                        <?= htmlspecialchars($siswa['status_aktif'] ?? 'Aktif') ?>
-                                    </td>
+                                        <td>
+                                            <?= htmlspecialchars($siswa['alamat'] ?? '', ENT_QUOTES, 'UTF-8'); ?>
+                                        </td>
 
-                                    <td>
-                                        <a href="edit_siswa.php?nis=<?= urlencode($nis) ?>"
-                                            class="btn btn-warning btn-sm mb-1">
-                                            Edit
-                                        </a>
+                                        <td>
+                                            <?= htmlspecialchars($siswa['status_aktif'] ?? 'Aktif', ENT_QUOTES, 'UTF-8'); ?>
+                                        </td>
 
-                                        <a href="hapus_siswa.php?nis=<?= urlencode($nis) ?>"
-                                            class="btn btn-danger btn-sm mb-1"
-                                            onclick="return confirm('Yakin ingin menghapus data siswa ini?')">
-                                            Hapus
-                                        </a>
-                                    </td>
-                                </tr>
+                                        <td>
+
+                                            <a
+                                                href="edit_siswa.php?nis=<?= urlencode($nis); ?>"
+                                                class="btn btn-warning btn-sm mb-1"
+                                            >
+                                                Edit
+                                            </a>
+
+                                            <a
+                                                href="hapus_siswa.php?nis=<?= urlencode($nis); ?>"
+                                                class="btn btn-danger btn-sm mb-1"
+                                                onclick="return confirm('Yakin ingin menghapus data siswa ini?')"
+                                            >
+                                                Hapus
+                                            </a>
+
+                                        </td>
+
+                                    </tr>
 
                                 <?php } ?>
 
                             </tbody>
+
                         </table>
 
                     </div>
 
                 </div>
+
             </div>
 
         </main>
 
     </div>
+
 </div>
 
-<!-- jQuery -->
+<!-- JQUERY -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- Bootstrap JS -->
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.1.3/dist/js/bootstrap.bundle.min.js"></script>
+<!-- BOOTSTRAP 5 JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- DataTables JS -->
+<!-- DATATABLES JS -->
 <script src="https://cdn.datatables.net/1.13.8/js/jquery.dataTables.min.js"></script>
 
-<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdn.datatables.net/1.13.8/js/dataTables.bootstrap5.min.js"></script>
 
-<!-- DATATABLES -->
+<!-- INISIALISASI DATATABLES -->
 <script>
+
 $(document).ready(function () {
 
     $('#tabelSiswa').DataTable({
@@ -234,26 +338,44 @@ $(document).ready(function () {
         autoWidth: false,
 
         language: {
+
             search: "Cari siswa:",
+
             lengthMenu: "Tampilkan _MENU_ data",
+
             zeroRecords: "Data siswa tidak ditemukan",
+
             info: "Menampilkan _START_ sampai _END_ dari _TOTAL_ data",
+
             infoEmpty: "Tidak ada data siswa",
+
             infoFiltered: "(difilter dari _MAX_ total data)",
+
             emptyTable: "Belum ada data siswa",
 
             paginate: {
+
                 first: "Pertama",
+
                 last: "Terakhir",
+
                 next: "Selanjutnya",
+
                 previous: "Sebelumnya"
+
             }
+
         }
 
     });
 
 });
+
 </script>
 
 </body>
 </html>
+
+<?php
+mysqli_free_result($hasil);
+?>

@@ -46,7 +46,7 @@ include 'includes/cek_session.php';
                             <label for="nip" class="form-label">NIP</label>
                             <input type="text"
                                    name="nip"
-                                   maxlength="10"
+                                   maxlength="18"
                                    id="nip"
                                    class="form-control"
                                    required>

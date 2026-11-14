@@ -153,7 +153,7 @@ if (!$hasil) {
 
     <title>Catat Pelanggaran Siswa</title>
 
-    <!-- BOOTSTRAP 5.3.8 -->
+    <!-- BOOTSTRAP 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
           rel="stylesheet">
 
@@ -161,7 +161,7 @@ if (!$hasil) {
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css"
           rel="stylesheet">
 
-    <!-- DATATABLES BOOTSTRAP 5 -->
+    <!-- DATATABLES -->
     <link href="https://cdn.datatables.net/1.13.8/css/dataTables.bootstrap5.min.css"
           rel="stylesheet">
 
@@ -169,7 +169,7 @@ if (!$hasil) {
     <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css"
           rel="stylesheet">
 
-    <!-- SELECT2 THEME BOOTSTRAP 5 -->
+    <!-- SELECT2 BOOTSTRAP 5 -->
     <link href="https://cdn.jsdelivr.net/npm/select2-bootstrap-5-theme@1.3.0/dist/select2-bootstrap-5-theme.min.css"
           rel="stylesheet">
 
@@ -203,7 +203,7 @@ if (!$hasil) {
             font-weight: 600;
         }
 
-        /* HEADER TABEL BIRU */
+        /* HEADER TABEL */
         #tabelPelanggaran thead th {
             background-color: #0d6efd !important;
             color: white !important;
@@ -230,6 +230,41 @@ if (!$hasil) {
 
         .select2-container--bootstrap-5 .select2-selection {
             min-height: 38px;
+        }
+
+        /* STATUS */
+        .badge-status {
+            padding: 7px 12px;
+            border-radius: 5px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .status-selesai {
+            background-color: #198754 !important;
+            color: #ffffff !important;
+        }
+
+        .status-proses {
+            background-color: #ffc107 !important;
+            color: #212529 !important;
+        }
+
+        .status-ditindaklanjuti {
+            background-color: #0d6efd !important;
+            color: #ffffff !important;
+        }
+
+        .status-lainnya {
+            background-color: #6c757d !important;
+            color: #ffffff !important;
+        }
+
+        /* TOMBOL AKSI */
+        .aksi-wrapper {
+            display: flex;
+            gap: 5px;
+            align-items: center;
         }
 
         /* RESPONSIVE */
@@ -302,15 +337,12 @@ if (!$hasil) {
         <?php } ?>
 
 
-        <!-- ================================= -->
         <!-- FORM CATAT PELANGGARAN -->
-        <!-- ================================= -->
         <div class="card shadow-sm mb-4">
 
             <div class="card-body">
 
                 <h5 class="mb-4">Form Catat Pelanggaran</h5>
-
 
                 <!-- PERINGATAN TAHUN AJARAN -->
                 <?php if ($tahun_ajaran_id == '') { ?>
@@ -321,7 +353,6 @@ if (!$hasil) {
                     </div>
 
                 <?php } ?>
-
 
                 <!-- PERINGATAN GURU -->
                 <?php if ($guru_id == '') { ?>
@@ -339,7 +370,7 @@ if (!$hasil) {
 
                     <div class="row">
 
-                        <!-- SISWA DENGAN PENCARIAN -->
+                        <!-- SISWA -->
                         <div class="col-md-6 mb-3">
 
                             <label class="form-label">Siswa</label>
@@ -490,8 +521,6 @@ if (!$hasil) {
                         </div>
 
 
-                    
-
                         <!-- STATUS -->
                         <div class="col-md-6 mb-3">
 
@@ -516,8 +545,6 @@ if (!$hasil) {
                             </select>
 
                         </div>
-
-                        
 
 
                         <!-- KETERANGAN -->
@@ -559,9 +586,7 @@ if (!$hasil) {
         </div>
 
 
-        <!-- ================================= -->
         <!-- TABEL DATA PELANGGARAN -->
-        <!-- ================================= -->
         <div class="card shadow-sm">
 
             <div class="card-body">
@@ -596,6 +621,11 @@ if (!$hasil) {
 
                             <?php while ($row = mysqli_fetch_assoc($hasil)) { ?>
 
+                                <?php
+                                $status = trim($row['status'] ?? '');
+                                $status_lower = strtolower($status);
+                                ?>
+
                                 <tr>
 
                                     <td><?= $no++; ?></td>
@@ -628,29 +658,85 @@ if (!$hasil) {
                                         <?= (int) ($row['poin'] ?? 0); ?>
                                     </td>
 
+
+                                    <!-- STATUS -->
                                     <td>
-                                        <?= htmlspecialchars($row['status'] ?? '-'); ?>
+
+                                        <?php if ($status_lower === 'selesai') { ?>
+
+                                            <span class="badge badge-status status-selesai">
+                                                Selesai
+                                            </span>
+
+                                        <?php } elseif ($status_lower === 'proses') { ?>
+
+                                            <span class="badge badge-status status-proses">
+                                                Proses
+                                            </span>
+
+                                        <?php } elseif ($status_lower === 'ditindaklanjuti') { ?>
+
+                                            <span class="badge badge-status status-ditindaklanjuti">
+                                                Ditindaklanjuti
+                                            </span>
+
+                                        <?php } else { ?>
+
+                                            <span class="badge badge-status status-lainnya">
+                                                <?= htmlspecialchars($status ?: '-'); ?>
+                                            </span>
+
+                                        <?php } ?>
+
                                     </td>
+
+
+                                    <!-- AKSI -->
                                     <td>
-    <div class="d-flex gap-1">
-        <a href="edit_pelanggaran.php?id=<?= (int) $row['id']; ?>"
-           class="btn btn-warning btn-sm">
-            <i class="bi bi-pencil-square"></i> Edit
-        </a>
 
-  <form action="hapus_catat_pelanggaran.php"
-      method="POST"
-      onsubmit="return confirm('Yakin ingin menghapus catatan pelanggaran ini?');">
+                                        <?php if ($status_lower !== 'selesai') { ?>
 
-    <input type="hidden"
-           name="id"
-           value="<?= (int) $row['id']; ?>">
+                                            <div class="aksi-wrapper">
 
-    <button type="submit" class="btn btn-danger btn-sm">
-        <i class="bi bi-trash"></i> Hapus
-    </button>
+                                                <a href="edit_pelanggaran.php?id=<?= (int) $row['id']; ?>"
+                                                   class="btn btn-warning btn-sm">
 
-</form>
+                                                    <i class="bi bi-pencil-square"></i>
+                                                    Edit
+
+                                                </a>
+
+
+                                                <form action="hapus_catat_pelanggaran.php"
+                                                      method="POST"
+                                                      onsubmit="return confirm('Yakin ingin menghapus catatan pelanggaran ini?');">
+
+                                                    <input type="hidden"
+                                                           name="id"
+                                                           value="<?= (int) $row['id']; ?>">
+
+                                                    <button type="submit"
+                                                            class="btn btn-danger btn-sm">
+
+                                                        <i class="bi bi-trash"></i>
+                                                        Hapus
+
+                                                    </button>
+
+                                                </form>
+
+                                            </div>
+
+                                        <?php } else { ?>
+
+                                            <span class="text-muted">
+                                                Tidak ada aksi
+                                            </span>
+
+                                        <?php } ?>
+
+                                    </td>
+
                                 </tr>
 
                             <?php } ?>
@@ -670,14 +756,12 @@ if (!$hasil) {
 </div>
 
 
-<!-- ================================= -->
 <!-- JAVASCRIPT -->
-<!-- ================================= -->
 
 <!-- JQUERY -->
 <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
 
-<!-- BOOTSTRAP 5 -->
+<!-- BOOTSTRAP -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
 <!-- SELECT2 -->
@@ -740,10 +824,8 @@ $(document).ready(function () {
 
         const opsi = this.options[this.selectedIndex];
 
-        const poin = opsi ? opsi.dataset.poin : '';
         const kategori = opsi ? opsi.dataset.kategori : '';
 
-        $('#poin').val(poin || '');
         $('#kategori').val(kategori || '');
 
     });

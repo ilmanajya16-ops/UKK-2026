@@ -1,24 +1,142 @@
-
 <?php
-// edit_siswa.php
+// hapus_siswa.php
+
 include 'includes/cek_session.php';
 include 'config/koneksi.php';
 
-if (!isset($_GET['id']) || !is_numeric($_GET['id'])) {
-    die("ID siswa tidak valid.");
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
 }
 
-$id = (int) $_GET['id'];
+// ==========================================
+// FUNGSI ESCAPE
+// ==========================================
+function e($data)
+{
+    return htmlspecialchars((string)($data ?? ''), ENT_QUOTES, 'UTF-8');
+}
 
-$stmt = mysqli_prepare($koneksi, "SELECT * FROM t_siswa WHERE id = ?");
+// ==========================================
+// PROSES HAPUS SISWA
+// ==========================================
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+    // Ambil ID dari form POST
+    $id = $_POST['id'] ?? '';
+
+    if (!is_scalar($id) || !ctype_digit((string)$id) || (int)$id <= 0) {
+        die("ID siswa tidak valid.");
+    }
+
+    $id = (int)$id;
+
+    // Periksa apakah siswa masih tersedia
+    $stmt = mysqli_prepare(
+        $koneksi,
+        "SELECT id FROM t_siswa WHERE id = ?"
+    );
+
+    mysqli_stmt_bind_param($stmt, "i", $id);
+    mysqli_stmt_execute($stmt);
+
+    $result = mysqli_stmt_get_result($stmt);
+    $cek = mysqli_fetch_assoc($result);
+
+    mysqli_stmt_close($stmt);
+
+    if (!$cek) {
+        echo "<script>
+            alert('Data siswa tidak ditemukan!');
+            window.location.href = 'kelola_siswa.php';
+        </script>";
+        exit;
+    }
+
+    // Hapus data siswa
+    $stmt_hapus = mysqli_prepare(
+        $koneksi,
+        "DELETE FROM t_siswa WHERE id = ?"
+    );
+
+    mysqli_stmt_bind_param($stmt_hapus, "i", $id);
+
+    if (mysqli_stmt_execute($stmt_hapus)) {
+
+        $jumlah = mysqli_stmt_affected_rows($stmt_hapus);
+
+        mysqli_stmt_close($stmt_hapus);
+
+        if ($jumlah > 0) {
+            echo "<script>
+                alert('Data siswa berhasil dihapus!');
+                window.location.href = 'kelola_siswa.php';
+            </script>";
+            exit;
+        }
+
+    } else {
+
+        mysqli_stmt_close($stmt_hapus);
+
+        echo "<script>
+            alert('Data siswa gagal dihapus! Siswa mungkin masih memiliki riwayat pelanggaran atau data kelas.');
+            window.location.href = 'kelola_siswa.php';
+        </script>";
+        exit;
+    }
+
+    header("Location: kelola_siswa.php");
+    exit;
+}
+
+// ==========================================
+// AMBIL ID DARI URL GET
+// ==========================================
+$id = $_GET['id'] ?? '';
+
+if (!is_scalar($id) || !ctype_digit((string)$id) || (int)$id <= 0) {
+    echo "<script>
+        alert('ID siswa tidak valid!');
+        window.location.href = 'kelola_siswa.php';
+    </script>";
+    exit;
+}
+
+$id = (int)$id;
+
+// ==========================================
+// AMBIL DATA SISWA
+// ==========================================
+$stmt = mysqli_prepare(
+    $koneksi,
+    "SELECT * FROM t_siswa WHERE id = ?"
+);
+
 mysqli_stmt_bind_param($stmt, "i", $id);
 mysqli_stmt_execute($stmt);
 
-$hasil = mysqli_stmt_get_result($stmt);
-$data = mysqli_fetch_assoc($hasil);
+$result = mysqli_stmt_get_result($stmt);
+$siswa = mysqli_fetch_assoc($result);
 
-if (!$data) {
-    die("Data siswa tidak ditemukan.");
+mysqli_stmt_close($stmt);
+
+if (!$siswa) {
+    echo "<script>
+        alert('Data siswa tidak ditemukan!');
+        window.location.href = 'kelola_siswa.php';
+    </script>";
+    exit;
+}
+
+// ==========================================
+// JENIS KELAMIN
+// ==========================================
+if ($siswa['jenis_kelamin'] === 'L') {
+    $jenis_kelamin = 'Laki-laki';
+} elseif ($siswa['jenis_kelamin'] === 'P') {
+    $jenis_kelamin = 'Perempuan';
+} else {
+    $jenis_kelamin = $siswa['jenis_kelamin'];
 }
 ?>
 
@@ -26,186 +144,141 @@ if (!$data) {
 <html lang="id">
 
 <head>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Edit Siswa</title>
 
-    <!-- Bootstrap 5 -->
+    <title>Hapus Siswa</title>
+
+    <!-- BOOTSTRAP 5 -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css"
           rel="stylesheet">
+
+    <style>
+        body {
+            background: #f5f6fa;
+        }
+
+        .content {
+            margin-left: 250px;
+            width: calc(100% - 250px);
+            padding: 30px;
+        }
+
+        .card {
+            border: none;
+            border-radius: 10px;
+        }
+
+        .card-header {
+            font-weight: 600;
+        }
+
+        .table th {
+            background: #f8f9fa;
+            width: 30%;
+        }
+
+        @media (max-width: 768px) {
+            .content {
+                margin-left: 0;
+                width: 100%;
+                padding: 15px;
+            }
+        }
+    </style>
+
 </head>
 
 <body>
 
 <div class="container-fluid">
+
     <div class="row">
 
         <!-- SIDEBAR -->
         <?php include 'layout/sidebar.php'; ?>
 
-        <!-- KONTEN UTAMA -->
-        <main class="col-md-9 col-lg-10 p-4">
+        <!-- KONTEN -->
+        <main class="content">
 
-            <h1 class="mb-4">Edit Siswa</h1>
+            <h3 class="mb-4">Hapus Siswa</h3>
 
             <div class="card shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    Form Edit Siswa
+
+                <div class="card-header bg-danger text-white">
+                    Konfirmasi Hapus Siswa
                 </div>
 
                 <div class="card-body">
 
-                    <form action="proses_edit_siswa.php"
-                          method="POST"
-                          id="formEditSiswa">
+                    <div class="alert alert-warning">
+                        <strong>Perhatian!</strong>
+                        Apakah Anda yakin ingin menghapus data siswa ini?
+                    </div>
 
-                        <input type="hidden" name="id"
-                               value="<?= htmlspecialchars($data['id']) ?>">
+                    <table class="table table-bordered">
 
-                        <div class="mb-3">
-                            <label class="form-label">NIS</label>
-                            <input type="text" name="nis"
-                                   class="form-control"
-                                   value="<?= htmlspecialchars($data['nis']) ?>"
-                                   required>
-                        </div>
+                        <tr>
+                            <th>ID Siswa</th>
+                            <td><?= e($siswa['id']) ?></td>
+                        </tr>
 
-                        <div class="mb-3">
-                            <label class="form-label">NISN</label>
-                            <input type="text" name="nisn"
-                                   class="form-control"
-                                   value="<?= htmlspecialchars($data['nisn']) ?>"
-                                   required>
-                        </div>
+                        <tr>
+                            <th>NIS</th>
+                            <td><?= e($siswa['nis']) ?></td>
+                        </tr>
 
-                        <div class="mb-3">
-                            <label class="form-label">Nama Siswa</label>
-                            <input type="text" name="nama"
-                                   class="form-control"
-                                   value="<?= htmlspecialchars($data['nama']) ?>"
-                                   required>
-                        </div>
+                        <tr>
+                            <th>NISN</th>
+                            <td><?= e($siswa['nisn']) ?></td>
+                        </tr>
 
-                        <div class="mb-3">
-                            <label class="form-label d-block">Jenis Kelamin</label>
+                        <tr>
+                            <th>Nama Siswa</th>
+                            <td><?= e($siswa['nama']) ?></td>
+                        </tr>
 
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input"
-                                       type="radio"
-                                       name="jenis_kelamin"
-                                       id="laki"
-                                       value="L"
-                                       <?= $data['jenis_kelamin'] == 'L' ? 'checked' : '' ?>
-                                       required>
-                                <label class="form-check-label" for="laki">
-                                    Laki-laki
-                                </label>
-                            </div>
+                        <tr>
+                            <th>Jenis Kelamin</th>
+                            <td><?= e($jenis_kelamin) ?></td>
+                        </tr>
 
-                            <div class="form-check form-check-inline">
-                                <input class="form-check-input"
-                                       type="radio"
-                                       name="jenis_kelamin"
-                                       id="perempuan"
-                                       value="P"
-                                       <?= $data['jenis_kelamin'] == 'P' ? 'checked' : '' ?>
-                                       required>
-                                <label class="form-check-label" for="perempuan">
-                                    Perempuan
-                                </label>
-                            </div>
-                        </div>
+                    </table>
 
-                        <div class="mb-3">
-                            <label class="form-label">Tanggal Lahir</label>
-                            <input type="date"
-                                   name="tanggal_lahir"
-                                   class="form-control"
-                                   value="<?= htmlspecialchars($data['tanggal_lahir']) ?>"
-                                   required>
-                        </div>
+                    <!-- FORM HAPUS -->
+                    <form method="POST" action="hapus_siswa.php">
 
-                        <div class="mb-3">
-                            <label class="form-label">Alamat</label>
-                            <textarea name="alamat"
-                                      class="form-control"
-                                      rows="4"
-                                      required><?= htmlspecialchars($data['alamat']) ?></textarea>
-                        </div>
+                        <input type="hidden"
+                               name="id"
+                               value="<?= (int)$siswa['id'] ?>">
 
-                        <div class="mb-3">
-                            <label class="form-label">Password Baru</label>
-                            <input type="password"
-                                   name="password"
-                                   id="password"
-                                   class="form-control"
-                                   autocomplete="new-password">
-                            <div class="form-text">
-                                Kosongkan jika tidak ingin mengubah password.
-                            </div>
-                        </div>
+                        <button type="submit"
+                                class="btn btn-danger"
+                                onclick="return confirm('Apakah Anda yakin ingin menghapus siswa ini secara permanen?')">
 
-                        <div class="mb-3">
-                            <label class="form-label">Konfirmasi Password</label>
-                            <input type="password"
-                                   name="konfirmasi_password"
-                                   id="konfirmasi_password"
-                                   class="form-control"
-                                   autocomplete="new-password">
-                        </div>
+                            Hapus Siswa
 
-                        <div class="mb-4">
-                            <label class="form-label">Status Aktif</label>
-                            <select name="status_aktif"
-                                    class="form-select"
-                                    required>
-                                <option value="1"
-                                    <?= $data['status_aktif'] == 1 ? 'selected' : '' ?>>
-                                    Aktif
-                                </option>
-
-                                <option value="0"
-                                    <?= $data['status_aktif'] == 0 ? 'selected' : '' ?>>
-                                    Tidak Aktif
-                                </option>
-                            </select>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary">
-                            Update Siswa
                         </button>
 
                         <a href="kelola_siswa.php"
                            class="btn btn-secondary">
-                            Kembali
+
+                            Batal
+
                         </a>
 
                     </form>
 
                 </div>
+
             </div>
 
         </main>
+
     </div>
+
 </div>
-
-<script>
-document.getElementById('formEditSiswa').addEventListener('submit', function(e) {
-    const password = document.getElementById('password').value;
-    const konfirmasi = document.getElementById('konfirmasi_password').value;
-
-    if (password !== konfirmasi) {
-        e.preventDefault();
-        alert('Password dan konfirmasi password tidak sama!');
-        return;
-    }
-
-    if ((password === '') !== (konfirmasi === '')) {
-        e.preventDefault();
-        alert('Isi password dan konfirmasi password, atau kosongkan keduanya.');
-    }
-});
-</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
 
